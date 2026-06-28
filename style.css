@@ -834,7 +834,7 @@ thead th:last-child {
 }
 
 .page[data-page="plaza"] {
-  padding-top: 19px;
+  padding-top: 24px;
 }
 
 .page[data-page="plaza"] .page-title-row h2 {
@@ -3263,8 +3263,26 @@ textarea.form-control {
 /* =========================================================
    商品素材库
    ========================================================= */
+.page[data-page="materials"] .page-title-row h2 {
+  font-size: 18px;
+  line-height: 26px;
+}
+
 .page[data-page="materials"] .product-toolbar {
   align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: auto;
+}
+
+.page[data-page="materials"] .product-toolbar .pill-btn {
+  flex: 0 0 auto;
+}
+
+.page[data-page="materials"] .product-toolbar .square-search {
+  flex: 0 0 280px;
+  min-width: 280px;
+  margin-left: auto;
 }
 
 .page[data-page="materials"] .product-grid {
