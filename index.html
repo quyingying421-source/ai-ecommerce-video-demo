@@ -78,27 +78,74 @@
         </div>
         <div class="project-workbench">
           <div class="project-input-panel">
-            <div class="project-panel-head"><div><h3>输入参数</h3><p>填写基础脚本与素材配置。</p></div></div>
-            <div class="project-prompt-card">
-              <label class="prompt-label">视频脚本</label>
-              <div class="project-prompt-box">突出商品卖点，生成适合电商投放的口播短视频。</div>
+            <div class="project-panel-head">
+              <div>
+                <h3>参数设置</h3>
+                <p>填写创作描述并补充生成素材。</p>
+              </div>
             </div>
-            <div class="project-action-bar"><button class="btn primary" type="button" data-modal="confirm-generate">提交生成</button></div>
+            <div class="project-prompt-card">
+              <label class="prompt-label">创作描述</label>
+              <div class="project-prompt-box" contenteditable="true">突出商品卖点，生成适合电商投放的口播短视频。</div>
+              <div class="composer-toolbar project-attach-row">
+                <button class="pill-btn project-attach-btn" type="button" data-toast="可从视频广场选择参考视频"><span class="project-attach-icon video"></span>参考视频</button>
+                <button class="pill-btn project-attach-btn" type="button" data-modal="product-upload"><span class="project-attach-icon product"></span>产品图</button>
+                <button class="pill-btn project-attach-btn" type="button" data-modal="model-create"><span class="project-attach-icon model"></span>模特图</button>
+                <button class="pill-btn project-attach-btn" type="button" data-modal="voice-upload"><span class="project-attach-icon voice"></span>音色</button>
+              </div>
+            </div>
+            <div class="project-params-card">
+              <div class="project-card-title">视频参数</div>
+              <div class="project-param-grid">
+                <label class="project-select-field"><span>视频比例</span><select><option>9:16 竖版</option><option>3:4 竖版</option><option>1:1 方形</option></select></label>
+                <label class="project-select-field"><span>视频时长</span><select><option>15-30 秒</option><option>30-45 秒</option><option>45-60 秒</option></select></label>
+              </div>
+              <div class="project-switch-list">
+                <label class="project-switch-row"><span><strong>生成人声</strong><small>使用上传音色生成口播</small></span><input type="checkbox" checked><i></i></label>
+                <label class="project-switch-row"><span><strong>自动字幕</strong><small>成片同步生成字幕</small></span><input type="checkbox" checked><i></i></label>
+              </div>
+            </div>
+            <div class="project-action-bar">
+              <button class="btn" type="button" data-toast="项目草稿已保存">保存草稿</button>
+              <button class="btn primary" type="button" data-modal="confirm-generate">提交生成</button>
+            </div>
           </div>
           <div class="project-output-panel">
-            <div class="project-panel-head"><div><h3>生成进度</h3><p id="projectCurrentStatus" class="project-current-status">等待提交生成任务</p></div><strong id="projectProgressPercent">0%</strong></div>
-            <div class="project-progress-bar"><span id="projectProgressFill" style="width:0%;"></span></div>
-            <div class="project-stage-list">
-              <div class="project-stage active" data-project-stage="1"><span class="stage-index">1</span><div><h3>输入参数</h3><p>素材与脚本校验</p></div><span class="project-stage-status">等待中</span></div>
-              <div class="project-stage" data-project-stage="2"><span class="stage-index">2</span><div><h3>生成视频切片和视频</h3><p>解析脚本并生成分镜</p></div><span class="project-stage-status">等待中</span></div>
-              <div class="project-stage" data-project-stage="3"><span class="stage-index">3</span><div><h3>视频裂变</h3><p>生成多版本素材</p></div><span class="project-stage-status">等待中</span></div>
+            <div class="project-panel-head">
+              <div>
+                <h3>生成区域</h3>
+                <p>提交后展示预览、阶段进度和输出状态。</p>
+              </div>
+              <button class="btn" type="button" data-jump="tasks">任务记录</button>
             </div>
-            <div class="project-status-list">
-              <div class="project-status-item active" data-project-status-step="1"><span></span>参考视频解析</div>
-              <div class="project-status-item" data-project-status-step="2"><span></span>脚本生成</div>
-              <div class="project-status-item" data-project-status-step="3"><span></span>分镜生成</div>
-              <div class="project-status-item" data-project-status-step="4"><span></span>视频合成</div>
-              <div class="project-status-item" data-project-status-step="5"><span></span>任务记录</div>
+            <div class="project-output-grid">
+              <div class="project-preview-card">
+                <div class="project-preview-head"><strong>视频预览</strong><span class="badge info">草稿</span></div>
+                <div class="project-preview-canvas">
+                  <div class="project-preview-frame">
+                    <span>9:16</span>
+                    <strong>等待生成</strong>
+                  </div>
+                </div>
+                <div class="project-preview-meta"><span>参考视频解析</span><span>商品卖点提取</span><span>口播字幕</span></div>
+              </div>
+              <div class="project-progress-card">
+                <div class="project-progress-head"><strong>当前进度</strong><span id="projectProgressPercent">0%</span></div>
+                <div class="project-progress-bar"><span id="projectProgressFill" style="width:0%;"></span></div>
+                <div class="project-current-status" id="projectCurrentStatus">等待提交生成任务</div>
+                <div class="project-status-list">
+                  <div class="project-status-item active" data-project-status-step="1"><span></span>参考视频解析</div>
+                  <div class="project-status-item" data-project-status-step="2"><span></span>脚本生成</div>
+                  <div class="project-status-item" data-project-status-step="3"><span></span>分镜生成</div>
+                  <div class="project-status-item" data-project-status-step="4"><span></span>视频合成</div>
+                  <div class="project-status-item" data-project-status-step="5"><span></span>任务记录</div>
+                </div>
+              </div>
+            </div>
+            <div class="project-stage-list">
+              <div class="project-stage active" data-project-stage="1"><span class="stage-index">1</span><div><h3>输入参数</h3><p>校验描述、素材和基础参数。</p></div><span class="project-stage-status">等待中</span></div>
+              <div class="project-stage" data-project-stage="2"><span class="stage-index">2</span><div><h3>生成视频切片和视频</h3><p>解析脚本，生成分镜切片并合成初版视频。</p></div><span class="project-stage-status">等待中</span></div>
+              <div class="project-stage" data-project-stage="3"><span class="stage-index">3</span><div><h3>视频裂变</h3><p>基于成片生成多版本镜头组合。</p></div><span class="project-stage-status">等待中</span></div>
             </div>
           </div>
         </div>
@@ -496,13 +543,16 @@
   </div>
 
   <div class="modal-backdrop" data-modal-panel="model-detail">
-    <div class="modal modal-panel model-detail-modal">
-      <div class="modal-head"><div><h3>模特详情</h3><p>查看模特适配信息。</p></div><button class="modal-close" type="button">×</button></div>
+    <div class="model-modal-shell model-detail-shell">
+      <button class="modal-close video-detail-close model-modal-close" type="button">×</button>
+      <div class="modal modal-panel model-detail-modal">
+        <div class="modal-head"><div><h3>模特详情</h3><p>查看模特适配信息。</p></div></div>
       <div class="modal-body model-detail-body">
         <div class="model-detail-side"><label>原图</label><div class="model-source-large"><img src="assets/model-detail-source.png" alt=""></div><p>都市通勤女模特，适合服装、箱包和配饰短视频。</p><div class="model-card-tags"><span class="badge model-tag-female">女性</span><span class="badge gray">亚洲</span><span class="badge gray">商务</span></div></div>
-        <div class="model-detail-main"><div class="model-detail-heading"><div><h3>五视图角色图</h3><p>正面、侧面、背面和动态参考已生成。</p></div><button class="btn" type="button" data-modal="model-edit">编辑模特</button></div><div class="model-five-view-large"><img src="assets/model-detail-five-view.png" alt=""></div><div class="model-version-row"><div class="model-version active"><img src="assets/model-detail-five-view.png" alt=""><b>当前</b></div><div class="model-version"><img src="assets/model-cover-black-dress.png" alt=""></div></div></div>
+        <div class="model-detail-main"><div class="model-detail-heading"><div><h3>角色五视图</h3><p>正面、侧面、背面和动态参考已生成。</p></div><div class="model-detail-heading-actions"><button class="btn model-detail-action-btn" type="button" data-toast="模特五视图已重新提交生成"><img src="assets/model-regenerate-btn-icon.png" alt="">重新生成</button><button class="btn model-detail-action-btn model-detail-edit-btn" type="button" data-modal="model-edit"><img src="assets/model-edit-btn-icon.png" alt="">编辑模特</button></div></div><div class="model-five-view-large"><img src="assets/model-detail-five-view.png" alt=""></div><div class="model-version-row"><div class="model-version active"><img src="assets/model-detail-five-view.png" alt=""><b>当前</b></div><div class="model-version"><img src="assets/model-cover-black-dress.png" alt=""></div></div></div>
       </div>
       <div class="modal-foot"><button class="btn primary" type="button" data-select-resource="model" data-resource-label="都市通勤女模特" data-resource-meta="适合服装、箱包和配饰口播视频">用于创作</button></div>
+      </div>
     </div>
   </div>
 
@@ -520,13 +570,16 @@
   </div>
 
   <div class="modal-backdrop" data-modal-panel="model-edit">
-    <div class="modal modal-panel model-edit-modal">
-      <div class="modal-head"><div><h3>编辑模特</h3><p>调整模特信息和适配标签。</p></div><button class="modal-close" type="button">×</button></div>
-      <div class="modal-body product-modal-body">
+    <div class="model-modal-shell model-edit-shell">
+      <button class="modal-close video-detail-close model-modal-close" type="button">×</button>
+      <div class="modal modal-panel model-edit-modal">
+        <div class="modal-head"><div><h3>编辑模特</h3><p>调整模特信息和适配标签。</p></div></div>
+      <div class="modal-body model-edit-body">
         <div class="model-edit-preview"><label>当前五视图</label><div class="model-five-view-large compact"><img src="assets/model-detail-five-view.png" alt=""></div></div>
-        <div class="form-grid"><label class="form-field"><span>模特名称</span><input class="form-control" value="都市通勤女模特"></label><label class="form-field"><span>模特标签</span><input class="form-control" value="女性、亚洲、商务、真实感"></label><label class="form-field"><span>适配说明</span><textarea class="form-control">适合服装、箱包和配饰口播视频。</textarea></label><div class="model-ai-attributes"><span class="badge gray">身形自然</span><span class="badge gray">五视图完整</span><span class="badge gray">可用于创作</span></div></div>
+        <div class="form-grid model-edit-form"><label class="form-field"><span>模特名称</span><input class="form-control" value="都市通勤女模特"></label><label class="form-field"><span>模特标签</span><input class="form-control" value="女性、亚洲、商务、真实感"></label><label class="form-field full"><span>适配说明</span><textarea class="form-control">适合服装、箱包和配饰口播视频。</textarea></label><div class="model-ai-attributes"><span class="badge gray">身形自然</span><span class="badge gray">五视图完整</span><span class="badge gray">可用于创作</span></div></div>
       </div>
       <div class="modal-foot split"><button class="btn danger" type="button" data-toast="模特已删除">删除模特</button><button class="btn primary" type="button" data-toast="模特已保存" data-close-modal>保存修改</button></div>
+      </div>
     </div>
   </div>
 
