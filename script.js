@@ -143,9 +143,91 @@ function renderVoiceAudioFile(input) {
   if (meta) meta.textContent = `已选择 1 个文件 · ${formatFileSize(file.size)} · MP3`;
 }
 
+// 新增模特弹窗交互
+let modelCreateTimer;
+
+function getModelCreateModal() {
+  return document.querySelector('[data-modal-panel="model-create"] .model-create-modal');
+}
+
+function setModelCreateSteps(panel, state) {
+  const analysis = panel.querySelector('[data-model-step="analysis"]');
+  const five = panel.querySelector('[data-model-step="five"]');
+  [analysis, five].forEach(step => step?.classList.remove("active", "complete"));
+  if (["idle", "analyzing"].includes(state)) analysis?.classList.add("active");
+  if (["analyzed", "generating", "complete"].includes(state)) analysis?.classList.add("complete");
+  if (state === "generating") five?.classList.add("active");
+  if (state === "complete") five?.classList.add("complete");
+}
+
+function setModelCreateFields(panel, mode) {
+  const values = {
+    name: "女性6岁甜美休闲/田园风",
+    gender: "女性 / 7",
+    style: "甜美休闲风、亚洲、真实感",
+    category: "童装、亲子用品、生活配饰"
+  };
+  const shouldClear = mode === "idle";
+  const editable = mode === "analyzed";
+  Object.entries(values).forEach(([key, value]) => {
+    const field = panel.querySelector(`[data-model-field="${key}"]`);
+    if (!field) return;
+    if (shouldClear) field.value = "";
+    if (mode === "analyzed") field.value = value;
+    field.disabled = !editable;
+  });
+}
+
+function setModelCreateState(state) {
+  const panel = getModelCreateModal();
+  if (!panel) return;
+  panel.dataset.modelCreateState = state;
+  setModelCreateSteps(panel, state);
+  setModelCreateFields(panel, state);
+
+  const primary = panel.querySelector("[data-model-create-primary]");
+  const dismiss = panel.querySelector("[data-dismiss]");
+  if (primary) {
+    const labelMap = {
+      idle: "生成五视图",
+      analyzing: "深度分析中...",
+      analyzed: "生成五视图",
+      generating: "正在生成五视图...",
+      complete: "确定创建"
+    };
+    primary.textContent = labelMap[state] || "生成五视图";
+    primary.disabled = ["idle", "analyzing", "generating"].includes(state);
+  }
+  if (dismiss) dismiss.textContent = state === "complete" ? "关闭" : "取消";
+}
+
+function resetModelCreateModal() {
+  clearTimeout(modelCreateTimer);
+  setModelCreateState("idle");
+}
+
+function startModelImageAnalysis() {
+  clearTimeout(modelCreateTimer);
+  setModelCreateState("analyzing");
+  modelCreateTimer = setTimeout(() => {
+    setModelCreateState("analyzed");
+    showToast("人像分析完成");
+  }, 1300);
+}
+
+function startModelFiveViewGeneration() {
+  clearTimeout(modelCreateTimer);
+  setModelCreateState("generating");
+  modelCreateTimer = setTimeout(() => {
+    setModelCreateState("complete");
+    showToast("五视图生成完成");
+  }, 1800);
+}
+
 function openModal(name, trigger) {
   closeModals();
   if (name === "voice-upload") updateVoiceModalMode(trigger);
+  if (name === "model-create") resetModelCreateModal();
   const panel = document.querySelector(`[data-modal-panel="${name}"]`);
   if (panel) {
     if (name === "product-upload") {
@@ -417,6 +499,38 @@ document.addEventListener("click", event => {
     event.preventDefault();
     const input = voiceAudioUploader.querySelector("[data-voice-audio-input]");
     if (input) input.click();
+    return;
+  }
+
+  const modelUploadCard = event.target.closest("[data-model-upload-card]");
+  if (modelUploadCard) {
+    event.preventDefault();
+    const panel = getModelCreateModal();
+    const state = panel?.dataset.modelCreateState;
+    if (state === "idle") startModelImageAnalysis();
+    return;
+  }
+
+  const modelCreatePrimary = event.target.closest("[data-model-create-primary]");
+  if (modelCreatePrimary) {
+    event.preventDefault();
+    const panel = getModelCreateModal();
+    const state = panel?.dataset.modelCreateState;
+    if (state === "analyzed") {
+      startModelFiveViewGeneration();
+      return;
+    }
+    if (state === "complete") {
+      closeModals();
+      showToast("模特创建成功");
+    }
+    return;
+  }
+
+  const modelCreateRegenerate = event.target.closest("[data-model-create-regenerate]");
+  if (modelCreateRegenerate) {
+    event.preventDefault();
+    startModelFiveViewGeneration();
     return;
   }
 
