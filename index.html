@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 电商视频 Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="global-header">
+    <div class="brand"><img class="brand-logo" src="assets/carter-ai-logo.png" alt="卡特加特 AI"></div>
+    <div class="header-actions">
+      <button class="notice" type="button" aria-label="通知"></button>
+      <div class="header-pill">管理中心<span class="header-chevron"></span></div>
+      <div class="credit-pill"><span class="credit-dot"></span>融豆 1280</div>
+      <img class="avatar" src="assets/user-avatar.png" alt="">
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <nav class="nav" id="nav">
+        <button class="nav-group expanded" type="button"><span class="nav-icon"></span>管理中心<span class="nav-arrow"></span></button>
+        <button class="nav-leaf active" data-page="plaza" type="button"><span class="nav-icon"></span>视频广场</button>
+        <button class="nav-leaf" data-page="project" type="button"><span class="nav-icon"></span>创建项目</button>
+        <button class="nav-leaf" data-page="materials" type="button"><span class="nav-icon"></span>商品素材库</button>
+        <button class="nav-leaf" data-page="models" type="button"><span class="nav-icon"></span>模特库</button>
+        <button class="nav-leaf" data-page="voices" type="button"><span class="nav-icon"></span>音色库</button>
+        <button class="nav-leaf nav-subitem" data-page="tasks" type="button"><span class="nav-icon"></span>任务记录</button>
+        <div class="nav-divider"></div>
+        <button class="nav-leaf plain" data-page="blank" data-title="数据看板" type="button"><span class="nav-icon"></span>数据看板</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="title-wrap">
+          <h1 id="pageTitle">视频广场</h1>
+          <p id="pageDesc">浏览电商视频模板、成片案例与可复用创作方案</p>
+        </div>
+        <div class="top-actions">
+          <div class="input">搜索内容</div>
+          <div class="select">全部状态</div>
+        </div>
+      </div>
+
+      <section class="page active" data-page="plaza">
+        <div class="page-title-row">
+          <div>
+            <h2>视频广场</h2>
+            <p>浏览精选电商短视频模板，点击卡片查看详情并复刻同款。</p>
+          </div>
+        </div>
+        <div class="gallery-grid plaza-video-grid">
+          <article class="gallery-card plaza-video-card" data-modal="video-detail">
+            <div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-01.png" alt=""><span class="poster-badge poster-category">女装</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">白色小香风套装街拍种草</span></div>
+          </article>
+          <article class="gallery-card plaza-video-card" data-modal="video-detail">
+            <div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-02.png" alt=""><span class="poster-badge poster-category">女装</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">学院风针织马甲通勤搭配</span></div>
+          </article>
+          <article class="gallery-card plaza-video-card" data-modal="video-detail">
+            <div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-03.png" alt=""><span class="poster-badge poster-category">女装</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">蓝色防晒外套少女感穿搭</span></div>
+          </article>
+          <article class="gallery-card plaza-video-card" data-modal="video-detail">
+            <div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-04.png" alt=""><span class="poster-badge poster-category">女装</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">无袖背心阔腿裤简约穿搭</span></div>
+          </article>
+          <article class="gallery-card plaza-video-card" data-modal="video-detail">
+            <div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-05.png" alt=""><span class="poster-badge poster-category">女装</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">风车草地半身裙度假穿搭</span></div>
+          </article>
+        </div>
+        <div id="plazaLoadMore" class="load-more">继续下拉加载更多视频</div>
+      </section>
+
+      <section class="page" data-page="project">
+        <div class="project-title-row">
+          <div>
+            <h2>创建项目</h2>
+            <p>配置参考视频、商品素材、模特和音色，提交生成任务。</p>
+          </div>
+        </div>
+        <div class="project-workbench">
+          <div class="project-input-panel">
+            <div class="project-panel-head"><div><h3>输入参数</h3><p>填写基础脚本与素材配置。</p></div></div>
+            <div class="project-prompt-card">
+              <label class="prompt-label">视频脚本</label>
+              <div class="project-prompt-box">突出商品卖点，生成适合电商投放的口播短视频。</div>
+            </div>
+            <div class="project-action-bar"><button class="btn primary" type="button" data-modal="confirm-generate">提交生成</button></div>
+          </div>
+          <div class="project-output-panel">
+            <div class="project-panel-head"><div><h3>生成进度</h3><p id="projectCurrentStatus" class="project-current-status">等待提交生成任务</p></div><strong id="projectProgressPercent">0%</strong></div>
+            <div class="project-progress-bar"><span id="projectProgressFill" style="width:0%;"></span></div>
+            <div class="project-stage-list">
+              <div class="project-stage active" data-project-stage="1"><span class="stage-index">1</span><div><h3>输入参数</h3><p>素材与脚本校验</p></div><span class="project-stage-status">等待中</span></div>
+              <div class="project-stage" data-project-stage="2"><span class="stage-index">2</span><div><h3>生成视频切片和视频</h3><p>解析脚本并生成分镜</p></div><span class="project-stage-status">等待中</span></div>
+              <div class="project-stage" data-project-stage="3"><span class="stage-index">3</span><div><h3>视频裂变</h3><p>生成多版本素材</p></div><span class="project-stage-status">等待中</span></div>
+            </div>
+            <div class="project-status-list">
+              <div class="project-status-item active" data-project-status-step="1"><span></span>参考视频解析</div>
+              <div class="project-status-item" data-project-status-step="2"><span></span>脚本生成</div>
+              <div class="project-status-item" data-project-status-step="3"><span></span>分镜生成</div>
+              <div class="project-status-item" data-project-status-step="4"><span></span>视频合成</div>
+              <div class="project-status-item" data-project-status-step="5"><span></span>任务记录</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-page="materials">
+        <div class="page-title-row">
+          <div><h2>商品素材库</h2><p>管理商品图、视频片段、卖点文本和平台适配素材</p></div>
+          <button class="btn primary" type="button" data-modal="product-upload">上传素材</button>
+        </div>
+        <div class="pill-row section product-toolbar">
+          <button class="pill-btn active" type="button" data-asset-filter="product" data-filter-value="all"><span class="task-tab-icon all"></span>全部</button>
+          <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="服装"><span class="task-tab-icon clothes"></span>服装</button>
+          <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="鞋子"><span class="task-tab-icon shoe"></span>鞋子</button>
+          <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="内衣"><span class="task-tab-icon inner"></span>内衣</button>
+          <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="箱包"><span class="task-tab-icon bag"></span>箱包</button>
+          <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="配饰"><span class="task-tab-icon belt"></span>配饰</button>
+          <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="帽子"><span class="task-tab-icon hat"></span>帽子</button>
+          <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="其他">其他</button>
+          <div class="square-search">搜索商品素材</div>
+        </div>
+        <div class="product-grid">
+          <article class="product-card" data-asset-card data-asset-type="product" data-category="鞋子">
+            <div class="product-card-top"><span class="badge success">可用</span><span>完整度 100%</span></div>
+            <div class="product-image product-shoes has-cover"><img src="assets/product-cover-01.png" alt=""></div>
+            <div class="product-card-copy"><h3>白色运动休闲鞋</h3><p>正面、侧面、背面、鞋底和 Logo 细节已补齐。</p></div>
+            <div class="meta-line"><span class="badge gray">5 张视角</span><span class="badge gray">Logo 已校验</span></div>
+            <div class="row-actions"><button class="btn primary" type="button" data-select-resource="product" data-resource-label="白色运动休闲鞋" data-resource-meta="5 张视角图已齐全，Logo 细节已校验">用于创作</button><button class="btn" type="button" data-modal="product-edit">编辑</button></div>
+          </article>
+          <article class="product-card" data-asset-card data-asset-type="product" data-category="服装">
+            <div class="product-card-top"><span class="badge info">待补细节</span><span>完整度 82%</span></div>
+            <div class="product-image product-apparel has-cover"><img src="assets/product-cover-02.png" alt=""></div>
+            <div class="product-card-copy"><h3>白色运动短袖 T 恤</h3><p>已识别版型、面料和正背面，建议补充领口图案细节。</p></div>
+            <div class="meta-line"><span class="badge gray">4 张视角</span><span class="badge gray">面料解析</span></div>
+            <div class="row-actions"><button class="btn primary" type="button" data-select-resource="product" data-resource-label="白色运动短袖 T 恤" data-resource-meta="版型和面料细节已解析">用于创作</button><button class="btn" type="button" data-modal="product-edit">编辑</button></div>
+          </article>
+          <article class="product-card" data-asset-card data-asset-type="product" data-category="内衣">
+            <div class="product-card-top"><span class="badge success">可用</span><span>完整度 96%</span></div>
+            <div class="product-image product-innerwear has-cover"><img src="assets/product-cover-03.png" alt=""></div>
+            <div class="product-card-copy"><h3>轻薄无痕内衣套装</h3><p>正背面、肩带扣位和面料纹理齐全，适合细节展示。</p></div>
+            <div class="meta-line"><span class="badge gray">4 张视角</span><span class="badge gray">纹理清晰</span></div>
+            <div class="row-actions"><button class="btn primary" type="button" data-select-resource="product" data-resource-label="轻薄无痕内衣套装" data-resource-meta="内衣素材视角完整，可用于创作">用于创作</button><button class="btn" type="button" data-modal="product-edit">编辑</button></div>
+          </article>
+          <article class="product-card" data-asset-card data-asset-type="product" data-category="箱包">
+            <div class="product-card-top"><span class="badge info">需补图</span><span>完整度 76%</span></div>
+            <div class="product-image product-bag has-cover"><img src="assets/product-cover-04.png" alt=""></div>
+            <div class="product-card-copy"><h3>通勤托特包</h3><p>外观和五金 Logo 已识别，建议补充开合结构和内里细节。</p></div>
+            <div class="meta-line"><span class="badge gray">3 张视角</span><span class="badge gray">五金识别</span></div>
+            <div class="row-actions"><button class="btn primary" type="button" data-select-resource="product" data-resource-label="通勤托特包" data-resource-meta="箱包素材已选择，建议补充内里细节">用于创作</button><button class="btn" type="button" data-modal="product-edit">编辑</button></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" data-page="models">
+        <div class="page-title-row model-title-row">
+          <div><h2>模特库</h2><p>共 24 个模特</p></div>
+          <button class="btn primary" type="button" data-modal="model-create"><img class="model-create-btn-icon" src="assets/model-create-icon.png" alt="">新增模特</button>
+        </div>
+        <div class="model-workspace">
+          <div class="model-filter-panel">
+            <div class="model-filter-group">
+              <div class="model-filter-list">
+                <button class="pill-btn active" type="button" data-asset-filter="model" data-filter-value="all">全部</button>
+                <button class="pill-btn" type="button" data-asset-filter="model" data-filter-value="男性">男性</button>
+                <button class="pill-btn" type="button" data-asset-filter="model" data-filter-value="女性">女性</button>
+                <button class="pill-btn" type="button" data-asset-filter="model" data-filter-value="男童">男童</button>
+                <button class="pill-btn" type="button" data-asset-filter="model" data-filter-value="女童">女童</button>
+              </div>
+            </div>
+            <div class="model-title-actions"><div class="square-search">搜索模特名称 / 风格 / 标签</div></div>
+            <div class="model-filter-group"><div class="model-tag-filter"><button class="pill-btn active" type="button">真实感</button><button class="pill-btn" type="button">3D</button><button class="pill-btn" type="button">亚洲</button><button class="pill-btn" type="button">欧美</button><button class="pill-btn" type="button">商务</button><button class="pill-btn" type="button">休闲</button><button class="pill-btn" type="button">古风</button></div></div>
+          </div>
+          <div class="model-content">
+            <div class="model-grid">
+              <article class="model-card featured" data-asset-card data-asset-type="model" data-category="女性 亚洲 商务" data-modal="model-detail"><div class="model-image model-visual"></div><div class="model-card-body"><h3>都市通勤女模特</h3><div class="model-card-tags"><span class="badge model-tag-female">女性</span><span class="badge gray">亚洲</span><span class="badge gray">商务</span></div><div class="row-actions"><button class="btn primary" type="button" data-select-resource="model" data-resource-label="都市通勤女模特" data-resource-meta="适合服装、箱包和配饰口播视频">用于创作</button><button class="btn" type="button" data-modal="model-detail">查看详情</button></div></div></article>
+              <article class="model-card" data-asset-card data-asset-type="model" data-category="男性 亚洲 休闲" data-modal="model-detail"><div class="model-image model-visual"></div><div class="model-card-body"><h3>户外休闲男模特</h3><div class="model-card-tags"><span class="badge model-tag-male">男性</span><span class="badge gray">亚洲</span><span class="badge gray">休闲</span></div><div class="row-actions"><button class="btn primary" type="button" data-select-resource="model" data-resource-label="户外休闲男模特" data-resource-meta="适合鞋服和运动品类展示">用于创作</button><button class="btn" type="button" data-modal="model-detail">查看详情</button></div></div></article>
+              <article class="model-card" data-asset-card data-asset-type="model" data-category="女性 欧美 真实感" data-modal="model-detail"><div class="model-image model-visual"></div><div class="model-card-body"><h3>欧美轻奢女模特</h3><div class="model-card-tags"><span class="badge model-tag-female">女性</span><span class="badge gray">欧美</span><span class="badge gray">真实感</span></div><div class="row-actions"><button class="btn primary" type="button" data-select-resource="model" data-resource-label="欧美轻奢女模特" data-resource-meta="适合配饰、箱包和美妆短视频">用于创作</button><button class="btn" type="button" data-modal="model-detail">查看详情</button></div></div></article>
+              <article class="model-card" data-asset-card data-asset-type="model" data-category="女童 亚洲 休闲" data-modal="model-detail"><div class="model-image model-visual"></div><div class="model-card-body"><h3>童装活力女童模特</h3><div class="model-card-tags"><span class="badge model-tag-female">女童</span><span class="badge gray">亚洲</span><span class="badge gray">休闲</span></div><div class="row-actions"><button class="btn primary" type="button" data-select-resource="model" data-resource-label="童装活力女童模特" data-resource-meta="适合童装和亲子场景">用于创作</button><button class="btn" type="button" data-modal="model-detail">查看详情</button></div></div></article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-page="voices">
+        <div class="page-title-row">
+          <div><h2>音色库</h2><p>上传并管理口播音色，供创建项目时复用。</p></div>
+          <button class="btn primary" type="button" data-modal="voice-upload"><img class="voice-upload-btn-icon" src="assets/voice-upload-icon.png" alt="">上传音色</button>
+        </div>
+        <div class="pill-row section">
+          <button class="pill-btn active" type="button" data-asset-filter="voice" data-filter-value="all">全部</button>
+          <button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="男声">男性</button>
+          <button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="女声">女性</button>
+          <button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="男童">男童</button>
+          <button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="女童">女童</button>
+          <div class="square-search">搜索音色名称 / 风格 / 标签</div>
+        </div>
+        <div class="pill-row section text-only"><button class="pill-btn active" type="button">真实感</button><button class="pill-btn" type="button">3D</button><button class="pill-btn" type="button">亚洲</button><button class="pill-btn" type="button">欧美</button><button class="pill-btn" type="button">商务</button><button class="pill-btn" type="button">休闲</button><button class="pill-btn" type="button">古风</button></div>
+        <div class="voice-grid">
+          <article class="voice-card" data-asset-card data-asset-type="voice" data-category="女声 自然 轻快"><div class="voice-identity"><img class="voice-avatar" src="assets/voice-avatars/warm-female.png" alt=""><div class="voice-main"><div class="voice-title-line"><h3>清爽女声</h3><span class="badge success">可用</span></div><p class="voice-card-desc">适合夏季服装、护肤和彩妆口播。</p><div class="voice-tags"><span class="voice-tag type-female">女声</span><span class="voice-tag">自然</span><span class="voice-tag">轻快</span></div></div></div><span class="voice-duration">00:28</span><button class="voice-play" type="button"><span>播放</span></button><button class="voice-edit" type="button" data-modal="voice-upload">编辑</button></article>
+          <article class="voice-card" data-asset-card data-asset-type="voice" data-category="男声 商务 稳重"><div class="voice-identity"><img class="voice-avatar" src="assets/voice-avatars/mature-male.png" alt=""><div class="voice-main"><div class="voice-title-line"><h3>成熟男声</h3><span class="badge success">可用</span></div><p class="voice-card-desc">适合家电、运动鞋和耐用品讲解。</p><div class="voice-tags"><span class="voice-tag type-male">男声</span><span class="voice-tag">商务</span><span class="voice-tag">稳重</span></div></div></div><span class="voice-duration">00:34</span><button class="voice-play" type="button"><span>播放</span></button><button class="voice-edit" type="button" data-modal="voice-upload">编辑</button></article>
+          <article class="voice-card" data-asset-card data-asset-type="voice" data-category="女声 专业 亲和"><div class="voice-identity"><img class="voice-avatar" src="assets/voice-avatars/pro-female.png" alt=""><div class="voice-main"><div class="voice-title-line"><h3>专业女声</h3><span class="badge success">可用</span></div><p class="voice-card-desc">适合美妆、服饰和生活类短视频口播。</p><div class="voice-tags"><span class="voice-tag type-female">女声</span><span class="voice-tag">专业</span><span class="voice-tag">亲和</span></div></div></div><span class="voice-duration">00:31</span><button class="voice-play" type="button"><span>播放</span></button><button class="voice-edit" type="button" data-modal="voice-upload">编辑</button></article>
+        </div>
+      </section>
+
+      <section class="page" data-page="tasks">
+        <div class="task-dashboard">
+          <div class="section-head">
+            <div>
+              <h2>任务记录</h2>
+              <p>集中查看视频生成、素材处理、模特生成和裂变任务</p>
+            </div>
+          </div>
+
+          <div class="task-summary">
+            <div class="task-summary-card featured" data-task-status="all"><div><span>全部</span><strong>154</strong></div><div class="task-summary-icon"></div></div>
+            <div class="task-summary-card" data-task-status="running"><div><span>生成中</span><strong>7</strong></div><div class="task-summary-icon progress"></div></div>
+            <div class="task-summary-card" data-task-status="done"><div><span>已完成</span><strong>116</strong></div><div class="task-summary-icon success"></div></div>
+            <div class="task-summary-card" data-task-status="failed"><div><span>失败</span><strong>3</strong></div><div class="task-summary-icon failed"></div></div>
+            <div class="task-summary-card" data-task-status="draft"><div><span>草稿</span><strong>28</strong></div><div class="task-summary-icon draft"></div></div>
+          </div>
+
+          <div class="task-tools">
+            <div class="task-tabs" id="taskTabs">
+              <button class="task-tab active" type="button" data-task-category="all"><span class="task-tab-icon all"></span>全部</button>
+              <button class="task-tab" type="button" data-task-category="服装"><span class="task-tab-icon clothes"></span>服装</button>
+              <button class="task-tab" type="button" data-task-category="鞋子"><span class="task-tab-icon shoe"></span>鞋子</button>
+              <button class="task-tab" type="button" data-task-category="包箱"><span class="task-tab-icon bag"></span>包箱</button>
+              <button class="task-tab" type="button" data-task-category="内衣"><span class="task-tab-icon inner"></span>内衣</button>
+            </div>
+            <div class="task-search">搜索任务名称 / 商品 / 模特 / 音色</div>
+          </div>
+
+          <div class="task-workspace">
+            <div class="task-list" id="taskList">
+              <article class="task-record active" data-task="task-1" data-status="running" data-category="服装">
+                <div class="task-cover video-a">
+                  <span class="task-type">视频</span>
+                  <div class="task-cover-title">夏季防晒衣穿搭口播</div>
+                </div>
+                <div class="task-main">
+                  <div class="task-title-row">
+                    <h3>夏季防晒衣穿搭口播生成</h3>
+                    <span class="badge info">生成中</span>
+                  </div>
+                  <div class="task-meta">
+                    <span>9:16</span><span><i class="task-dot"></i>36 秒</span><span><i class="task-dot"></i>720P</span><span><i class="task-dot"></i>2026-06-26 15:36</span>
+                  </div>
+                  <div class="task-assets">
+                    <span class="task-asset-chip">防晒衣</span>
+                    <span class="task-asset-chip">都市通勤女模特</span>
+                    <span class="task-asset-chip">清爽女声</span>
+                  </div>
+                  <div class="task-progress">
+                    <div class="task-progress-head"><span>分镜生成中，已完成 3/5</span></div>
+                    <div class="task-progress-line"><div class="task-progress-track"><div class="task-progress-bar" style="width:68%;"></div></div><strong>68%</strong></div>
+                  </div>
+                </div>
+                <div class="task-actions">
+                  <button class="btn primary" type="button" data-modal="task-progress">查看详情</button>
+                </div>
+              </article>
+
+              <article class="task-record" data-task="task-2" data-status="done" data-category="内衣">
+                <div class="task-cover video-b">
+                  <span class="task-type">视频</span>
+                  <div class="task-cover-title">补水面膜卖点短视频</div>
+                </div>
+                <div class="task-main">
+                  <div class="task-title-row">
+                    <h3>补水面膜卖点口播成片</h3>
+                    <span class="badge success">已完成</span>
+                  </div>
+                  <div class="task-meta">
+                    <span>9:16</span><span><i class="task-dot"></i>22 秒</span><span><i class="task-dot"></i>720P</span><span><i class="task-dot"></i>2026-06-26 11:08</span>
+                  </div>
+                  <div class="task-assets">
+                    <span class="task-asset-chip">补水面膜</span>
+                    <span class="task-asset-chip">未使用</span>
+                    <span class="task-asset-chip">促销播报</span>
+                  </div>
+                  <div class="task-progress">
+                    <div class="task-progress-head"><span>成片已生成，可下载或裂变</span></div>
+                    <div class="task-progress-line"><div class="task-progress-track"><div class="task-progress-bar success" style="width:100%;"></div></div><strong>100%</strong></div>
+                  </div>
+                </div>
+                <div class="task-actions">
+                  <button class="btn primary" type="button" data-modal="task-result">查看详情</button>
+                </div>
+              </article>
+
+              <article class="task-record" data-task="task-3" data-status="done" data-category="鞋子">
+                <div class="task-cover material">
+                  <span class="task-type">素材</span>
+                  <div class="task-cover-title">老爹鞋多视角商品图</div>
+                </div>
+                <div class="task-main">
+                  <div class="task-title-row">
+                    <h3>贵人鸟老爹鞋商品素材处理</h3>
+                    <span class="badge success">已完成</span>
+                  </div>
+                  <div class="task-meta">
+                    <span>5 张原图</span><span><i class="task-dot"></i>7 项卖点</span><span><i class="task-dot"></i>多视角已生成</span><span><i class="task-dot"></i>2026-06-26 09:42</span>
+                  </div>
+                  <div class="task-assets">
+                    <span class="task-asset-chip">鞋子</span>
+                    <span class="task-asset-chip">正面 / 侧面 / 鞋底 / Logo</span>
+                    <span class="task-asset-chip">可用于创作</span>
+                  </div>
+                  <div class="task-progress">
+                    <div class="task-progress-head"><span>商品解析与多视角图已完成</span></div>
+                    <div class="task-progress-line"><div class="task-progress-track"><div class="task-progress-bar success" style="width:100%;"></div></div><strong>100%</strong></div>
+                  </div>
+                </div>
+                <div class="task-actions">
+                  <button class="btn primary" type="button" data-modal="product-detail">查看详情</button>
+                </div>
+              </article>
+
+              <article class="task-record" data-task="task-4" data-status="failed" data-category="服装">
+                <div class="task-cover video-a">
+                  <span class="task-type">裂变</span>
+                  <div class="task-cover-title">连衣裙大促视频裂变</div>
+                </div>
+                <div class="task-main">
+                  <div class="task-title-row">
+                    <h3>连衣裙大促短视频裂变任务</h3>
+                    <span class="badge danger">失败</span>
+                  </div>
+                  <div class="task-meta">
+                    <span>9:16</span><span><i class="task-dot"></i>10 条变体</span><span><i class="task-dot"></i>失败阶段：分镜 4</span><span><i class="task-dot"></i>2026-06-25 18:22</span>
+                  </div>
+                  <div class="task-assets">
+                    <span class="task-asset-chip">白色连衣裙</span>
+                    <span class="task-asset-chip">家居生活场景模特</span>
+                    <span class="task-asset-chip">建议更换参考图</span>
+                  </div>
+                  <div class="task-progress">
+                    <div class="task-progress-head"><span>7/10 已完成，3 条需重试</span></div>
+                    <div class="task-progress-line"><div class="task-progress-track"><div class="task-progress-bar warning" style="width:70%;"></div></div><strong>70%</strong></div>
+                  </div>
+                </div>
+                <div class="task-actions">
+                  <span class="badge info task-action-tag">裂变</span>
+                  <button class="btn primary" type="button" data-modal="task-fail">查看详情</button>
+                </div>
+              </article>
+              <div class="task-empty" id="taskEmpty">当前筛选条件下暂无任务记录</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" data-page="blank">
+        <div class="empty-panel">
+          <div>
+            <h2 id="blankTitle">预留模块</h2>
+            <p>该菜单为统一平台预留模块，当前 AI 电商视频 demo 暂未配置内容。</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop video-detail-backdrop" data-modal-panel="video-detail">
+    <div class="modal modal-panel video-detail-modal">
+      <button class="modal-close video-detail-close" type="button">×</button>
+      <div class="video-detail-layout">
+        <div class="video-detail-media"><div class="video-detail-player"><img data-video-detail-cover src="assets/plaza-covers/plaza-01.png" alt=""></div></div>
+        <div class="video-detail-content">
+          <span class="badge info" data-video-detail-category>女装</span>
+          <h3 data-video-detail-title>白色小香风套装街拍种草</h3>
+          <p>可复刻同款视频结构、脚本节奏和镜头风格。</p>
+          <div class="task-stage-list">
+            <div class="task-stage"><strong>商品</strong><span data-video-detail-product>女生夏季轻薄外套</span></div>
+            <div class="task-stage"><strong>主题</strong><span data-video-detail-topic>白色小香风套装街拍种草</span></div>
+          </div>
+          <div class="modal-foot"><button class="btn video-detail-cta primary" type="button" data-select-resource="video" data-resource-label="白色小香风套装街拍种草" data-resource-meta="已选择视频广场模板">复刻同款</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="confirm-generate">
+    <div class="modal modal-panel">
+      <div class="modal-head"><div><h3>确认生成视频</h3><p>任务将进入任务记录，可后台查看进度。</p></div><button class="modal-close" type="button">×</button></div>
+      <div class="modal-body">
+        <div class="status-callout"><div><strong>提交后进入生成中</strong>系统会按输入参数、视频切片与视频生成、视频裂变三个阶段执行。</div></div>
+      </div>
+      <div class="modal-foot"><button class="btn" type="button" data-dismiss>取消</button><button class="btn primary" type="button" data-start-generate>确认生成</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="task-progress">
+    <div class="modal modal-panel">
+      <div class="modal-head"><div><h3>任务进度</h3><p>当前任务正在后台运行。</p></div><button class="modal-close" type="button">×</button></div>
+      <div class="modal-body">
+        <div class="status-callout"><span class="loading-dot"></span><div><strong>分镜视频生成中</strong>当前任务正在后台运行，关闭页面后仍会继续生成。</div></div>
+        <div class="live-progress"><span style="width:68%;"></span></div>
+        <div class="task-stage-list"><div class="task-stage"><strong>参考视频解析</strong><span>已完成</span></div><div class="task-stage"><strong>脚本生成</strong><span>已完成</span></div><div class="task-stage"><strong>分镜视频生成</strong><span>3/5</span></div><div class="task-stage"><strong>OpenCut 合成</strong><span>等待中</span></div></div>
+      </div>
+      <div class="modal-foot"><button class="btn primary" type="button" data-dismiss>后台运行</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="task-result">
+    <div class="modal modal-panel">
+      <div class="modal-head"><div><h3>任务结果</h3><p>成片已生成，可下载或裂变。</p></div><button class="modal-close" type="button">×</button></div>
+      <div class="modal-body"><div class="result-player"></div></div>
+      <div class="modal-foot"><button class="btn" type="button" data-toast="成片下载已开始">下载</button><button class="btn primary" type="button" data-toast="已创建裂变任务草稿">裂变</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="task-fail">
+    <div class="modal modal-panel">
+      <div class="modal-head"><div><h3>失败原因</h3><p>查看失败阶段和处理建议。</p></div><button class="modal-close" type="button">×</button></div>
+      <div class="modal-body"><div class="status-callout danger"><div><strong>分镜 4 生成失败</strong>任务未中断，修复素材后可仅重试失败分镜。</div></div><div class="task-stage-list"><div class="task-stage"><strong>失败阶段</strong><span>分镜 4 生成失败</span></div><div class="task-stage"><strong>原因</strong><span>模特参考图与商品角度不匹配</span></div><div class="task-stage"><strong>建议</strong><span>更换模特图或补充商品侧面细节</span></div></div></div>
+      <div class="modal-foot"><button class="btn" type="button" data-modal="product-upload">修改素材</button><button class="btn primary" type="button" data-toast="失败分镜已重新提交">重试失败分镜</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="product-detail">
+    <div class="modal modal-panel product-modal">
+      <div class="modal-head"><div><h3>商品素材详情</h3><p>查看商品素材解析结果。</p></div><button class="modal-close" type="button">×</button></div>
+      <div class="modal-body"><div class="task-stage-list"><div class="task-stage"><strong>品类</strong><span>鞋子，正侧背和 Logo 细节完整</span></div><div class="task-stage"><strong>关键元素</strong><span>白色鞋面、侧边透气孔、鞋舌标识、耐磨鞋底</span></div><div class="task-stage"><strong>视频建议</strong><span>上脚行走镜头 + Logo 特写 + 通勤场景展示</span></div></div></div>
+      <div class="modal-foot"><button class="btn primary" type="button" data-select-resource="product" data-resource-label="白色运动休闲鞋" data-resource-meta="已选择白色运动休闲鞋，包含正面、侧面、背面、鞋底和 Logo 图">用于创作</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="product-upload">
+    <div class="modal modal-panel product-modal">
+      <div class="modal-head"><div><h3>新增商品素材</h3><p data-upload-slot-summary>服装建议先补齐正面、背面和关键细节。</p></div><button class="modal-close" type="button">×</button></div>
+      <div class="modal-body product-modal-body">
+        <div class="product-modal-main">
+          <div class="product-step-row"><span class="active">选择品类</span><span>上传视角图</span><span>AI 解析</span><span>保存素材</span></div>
+          <div class="product-category-panel"><label>商品品类</label><div class="pill-row product-category-row"><button class="pill-btn active" type="button" data-upload-category="服装">服装</button><button class="pill-btn" type="button" data-upload-category="鞋子">鞋子</button><button class="pill-btn" type="button" data-upload-category="内衣">内衣</button><button class="pill-btn" type="button" data-upload-category="箱包">箱包</button><button class="pill-btn" type="button" data-upload-category="配饰">配饰</button><button class="pill-btn" type="button" data-upload-category="帽子">帽子</button><button class="pill-btn" type="button" data-upload-category="其他">其他</button></div></div>
+          <div class="product-upload-heading"><strong>视角图片</strong><span>按品类自动展示建议上传项</span></div>
+          <div class="product-upload-slots slot-grid" id="productUploadSlots" data-product-upload-slots></div>
+        </div>
+        <div class="product-modal-side">
+          <div class="form-grid"><label class="form-field"><span>商品名称</span><input class="form-control" value="白色运动休闲鞋"></label><label class="form-field"><span>商品元素说明</span><textarea class="form-control">白色鞋面、侧边透气孔、鞋舌标识、耐磨鞋底。</textarea></label><label class="form-field"><span>关键卖点</span><textarea class="form-control">轻盈透气，适合通勤、运动和日常穿搭。</textarea></label></div>
+          <div class="product-analysis-preview"><div class="status-callout"><div><strong>等待 AI 解析</strong>上传视角图片后可识别商品轮廓、Logo 和卖点。</div></div></div>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn" type="button" data-product-analyze>AI 解析</button><button class="btn primary" type="button" data-toast="商品素材已保存" data-close-modal>保存素材</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="product-edit">
+    <div class="modal modal-panel product-modal">
+      <div class="modal-head"><div><h3>编辑商品素材</h3><p data-upload-slot-summary>鞋子建议补齐正面、侧面、背面、鞋底和 Logo 细节。</p></div><button class="modal-close" type="button">×</button></div>
+      <div class="modal-body product-modal-body">
+        <div class="product-modal-main">
+          <div class="product-category-panel"><label>商品品类</label><div class="pill-row product-category-row"><button class="pill-btn" type="button" data-upload-category="服装">服装</button><button class="pill-btn active" type="button" data-upload-category="鞋子">鞋子</button><button class="pill-btn" type="button" data-upload-category="内衣">内衣</button><button class="pill-btn" type="button" data-upload-category="箱包">箱包</button><button class="pill-btn" type="button" data-upload-category="配饰">配饰</button><button class="pill-btn" type="button" data-upload-category="帽子">帽子</button><button class="pill-btn" type="button" data-upload-category="其他">其他</button></div></div>
+          <div class="product-upload-heading"><strong>已上传视角</strong><span>再次上传会替换对应图片</span></div>
+          <div class="product-upload-slots product-detail-slots slot-grid" data-product-upload-slots></div>
+        </div>
+        <div class="product-modal-side">
+          <div class="form-grid"><label class="form-field"><span>商品名称</span><input class="form-control" value="白色运动休闲鞋"></label><label class="form-field"><span>商品元素说明</span><textarea class="form-control">白色鞋面、侧边透气孔、鞋舌标识、耐磨鞋底。</textarea></label><label class="form-field"><span>适用场景</span><textarea class="form-control">通勤穿搭、运动休闲、Logo 特写。</textarea></label></div>
+          <div class="product-analysis-preview"><div class="status-callout success"><div><strong>解析完成</strong>商品元素和视频建议已生成，可继续补图或保存。</div></div></div>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn" type="button" data-product-analyze>重新解析</button><button class="btn primary" type="button" data-toast="商品素材已更新" data-close-modal>保存修改</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="model-detail">
+    <div class="modal modal-panel model-detail-modal">
+      <div class="modal-head"><div><h3>模特详情</h3><p>查看模特适配信息。</p></div><button class="modal-close" type="button">×</button></div>
+      <div class="modal-body model-detail-body">
+        <div class="model-detail-side"><label>原图</label><div class="model-source-large"><img src="assets/model-detail-source.png" alt=""></div><p>都市通勤女模特，适合服装、箱包和配饰短视频。</p><div class="model-card-tags"><span class="badge model-tag-female">女性</span><span class="badge gray">亚洲</span><span class="badge gray">商务</span></div></div>
+        <div class="model-detail-main"><div class="model-detail-heading"><div><h3>五视图角色图</h3><p>正面、侧面、背面和动态参考已生成。</p></div><button class="btn" type="button" data-modal="model-edit">编辑模特</button></div><div class="model-five-view-large"><img src="assets/model-detail-five-view.png" alt=""></div><div class="model-version-row"><div class="model-version active"><img src="assets/model-detail-five-view.png" alt=""><b>当前</b></div><div class="model-version"><img src="assets/model-cover-black-dress.png" alt=""></div></div></div>
+      </div>
+      <div class="modal-foot"><button class="btn primary" type="button" data-select-resource="model" data-resource-label="都市通勤女模特" data-resource-meta="适合服装、箱包和配饰口播视频">用于创作</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="model-create">
+    <div class="modal modal-panel model-create-modal">
+      <div class="modal-head"><div><h3>新增模特</h3><p>上传参考图并生成可复用 AI 模特。</p></div><button class="modal-close" type="button">×</button></div>
+      <div class="modal-body">
+        <div class="model-create-steps"><span class="complete">上传原图</span><i></i><span>生成五视图</span></div>
+        <div class="model-create-visual"><div class="model-upload-panel"><div class="model-source-preview"><div class="model-image model-visual"></div></div><span>上传模特原图</span></div><div class="model-flow-arrow">AI 生成</div><div class="model-result-preview"><div class="model-image model-visual"></div><span>生成角色五视图</span></div></div>
+        <div class="model-generation-status"><span class="loading-dot"></span><div><strong>等待生成</strong><p>上传原图后自动识别身形、风格和适配品类。</p></div></div>
+        <div class="form-grid model-form-grid"><label class="form-field"><span>模特名称</span><input class="form-control" value="都市通勤女模特"></label><label class="form-field"><span>性别 / 年龄</span><input class="form-control" value="女性 / 青年"></label><label class="form-field"><span>风格标签</span><input class="form-control" value="商务、亚洲、真实感"></label><label class="form-field"><span>适配品类</span><input class="form-control" value="服装、箱包、配饰"></label></div>
+      </div>
+      <div class="modal-foot"><button class="btn primary" type="button" data-toast="模特已创建" data-close-modal>保存模特</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="model-edit">
+    <div class="modal modal-panel model-edit-modal">
+      <div class="modal-head"><div><h3>编辑模特</h3><p>调整模特信息和适配标签。</p></div><button class="modal-close" type="button">×</button></div>
+      <div class="modal-body product-modal-body">
+        <div class="model-edit-preview"><label>当前五视图</label><div class="model-five-view-large compact"><img src="assets/model-detail-five-view.png" alt=""></div></div>
+        <div class="form-grid"><label class="form-field"><span>模特名称</span><input class="form-control" value="都市通勤女模特"></label><label class="form-field"><span>模特标签</span><input class="form-control" value="女性、亚洲、商务、真实感"></label><label class="form-field"><span>适配说明</span><textarea class="form-control">适合服装、箱包和配饰口播视频。</textarea></label><div class="model-ai-attributes"><span class="badge gray">身形自然</span><span class="badge gray">五视图完整</span><span class="badge gray">可用于创作</span></div></div>
+      </div>
+      <div class="modal-foot split"><button class="btn danger" type="button" data-toast="模特已删除">删除模特</button><button class="btn primary" type="button" data-toast="模特已保存" data-close-modal>保存修改</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-modal-panel="voice-upload" data-voice-mode="upload">
+    <div class="voice-modal-shell">
+      <button class="modal-close video-detail-close voice-modal-close" type="button">×</button>
+      <div class="modal modal-panel voice-modal">
+        <div class="modal-head"><div><h3 data-voice-modal-title>上传音色</h3><p>上传口播音频并生成音色。</p></div></div>
+        <div class="modal-body">
+          <label class="form-field"><span>上传音频</span>
+            <div class="voice-audio-uploader" role="button" tabindex="0" data-voice-audio-uploader>
+              <input class="voice-audio-input" data-voice-audio-input type="file" accept=".mp3,audio/mpeg">
+              <img class="voice-audio-upload-icon" src="assets/voice-audio-upload-icon.png" alt="">
+              <div class="voice-audio-upload-copy"><strong>选择音频文件</strong><span>支持 MP3，建议 15-40 秒。上传后系统自动识别时长与音色特征。</span></div>
+              <div class="voice-audio-file" data-voice-audio-file><strong data-voice-audio-name></strong><span data-voice-audio-meta></span></div>
+            </div>
+          </label>
+          <div class="form-grid"><label class="form-field"><span>音色标题</span><input class="form-control" value="温柔女声"></label><label class="form-field"><span>音色类型</span><input class="form-control" value="女声"></label><label class="form-field"><span>音色标签</span><input class="form-control" placeholder="输入标签后点击回车键添加"></label><label class="form-field"><span>音色描述</span><textarea class="form-control">温柔亲切，适合美妆、服饰和生活类短视频口播。</textarea></label></div>
+        </div>
+        <div class="modal-foot"><button class="btn" type="button" data-dismiss>取消</button><button class="btn primary" type="button" data-toast="音色已保存" data-close-modal>保存音色</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
