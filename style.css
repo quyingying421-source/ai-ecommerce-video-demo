@@ -3791,6 +3791,8 @@ textarea.form-control {
   border: 0;
   padding: 0;
   flex-wrap: nowrap;
+  margin-top: 12px;
+  margin-bottom: 6px;
 }
 
 .page[data-page="tasks"] .task-tabs {
