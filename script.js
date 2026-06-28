@@ -147,25 +147,42 @@ function openModal(name, trigger) {
   closeModals();
   if (name === "voice-upload") updateVoiceModalMode(trigger);
   const panel = document.querySelector(`[data-modal-panel="${name}"]`);
-  if (panel) panel.classList.add("active");
+  if (panel) {
+    if (name === "product-upload") {
+      const activeCategory = panel.querySelector("[data-upload-category].active")?.dataset.uploadCategory || "服装";
+      updateUploadSlots(activeCategory, panel);
+    }
+    panel.classList.add("active");
+  }
 }
 
 function hydrateVideoDetail(trigger) {
   if (!trigger) return;
   const image = trigger.querySelector(".poster-image");
-  const title = trigger.querySelector(".poster-title")?.textContent?.trim() || "轻松防晒，夏季必备时尚";
+  const title = trigger.querySelector(".poster-title")?.textContent?.trim() || "无袖背心阔腿裤简约穿搭";
   const category = trigger.querySelector(".poster-category")?.textContent?.trim() || "服装";
   const titleEl = document.querySelector("[data-video-detail-title]");
   const coverEl = document.querySelector("[data-video-detail-cover]");
   const categoryEl = document.querySelector("[data-video-detail-category]");
   const productEl = document.querySelector("[data-video-detail-product]");
+  const sellingEl = document.querySelector("[data-video-detail-selling]");
   const topicEl = document.querySelector("[data-video-detail-topic]");
+  const sceneEl = document.querySelector("[data-video-detail-scene]");
+  const scriptEl = document.querySelector("[data-video-detail-script]");
   const cta = document.querySelector(".video-detail-cta");
+  const isKids = category.includes("童");
   if (titleEl) titleEl.textContent = title;
   if (coverEl && image) coverEl.src = image.src;
   if (categoryEl) categoryEl.textContent = category;
-  if (productEl) productEl.textContent = category.includes("童") ? "儿童夏季穿搭单品" : "女生夏季轻薄外套";
+  if (productEl) productEl.textContent = isKids ? "儿童夏季穿搭单品" : "女生夏季轻薄外套";
+  if (sellingEl) sellingEl.textContent = isKids ? "亲肤舒适、活力百搭、适合出街和亲子日常场景。" : "防晒通勤、轻薄透气、显白显瘦、适配街拍和日常出行场景。";
   if (topicEl) topicEl.textContent = title;
+  if (sceneEl) sceneEl.textContent = isKids
+    ? "穿搭：一位活力自然的儿童模特穿着夏季单品，在街区、公园和亲子出行场景中自然走动。镜头包含正面出场、侧身转场、面料细节和步行动作，整体氛围明亮轻快，突出商品上身效果和日常搭配价值。"
+    : "穿搭：一位身材高挑、气质清爽的模特穿着夏季轻薄外套，搭配短裙或阔腿裤，在街区、公园和通勤路线自然走动。镜头包含正面出场、侧身转场、面料细节、包装配饰和步行动作，整体氛围干净明亮，突出商品上身效果和日常搭配价值。";
+  if (scriptEl) scriptEl.textContent = isKids
+    ? "夏天出门要轻松也要好看，这一套穿起来舒服不闷，跑跳活动都自在。日常出街、亲子旅行都很合适，随手一搭就有清爽活力感。"
+    : "夏天出门不想晒黑，也不想穿得闷热，这一件轻薄外套刚好解决。版型利落不挑身材，通勤、逛街、旅行都能搭，随手一穿就有清爽时尚感。";
   if (cta) {
     cta.dataset.resourceLabel = title;
     cta.dataset.resourceMeta = `已选择视频广场模板：${title}，可进入创建项目复刻同款`;
