@@ -8425,7 +8425,7 @@ textarea.form-control {
 }
 
 .project-generate-flow {
-  display: grid;
+  display: none;
   grid-template-columns: max-content 1fr max-content 1fr max-content;
   align-items: center;
   gap: 10px;
@@ -8656,9 +8656,9 @@ textarea.form-control {
   height: 32px;
   min-width: 72px;
   border-radius: 8px;
-  color: #505CFF;
-  border-color: #d9ddff;
-  background: #fff;
+  color: #fff;
+  border-color: #505CFF;
+  background: #505CFF;
 }
 
 .project-preview-head strong {
