@@ -356,12 +356,9 @@ function selectResource(type, label, meta) {
 }
 
 const projectGenerateSteps = [
-  { text: "正在解析参考视频", percent: 18, flow: 1, status: 1, badge: "解析中" },
-  { text: "正在生成替换脚本", percent: 34, flow: 2, status: 2, badge: "脚本中" },
-  { text: "正在生成九宫格分镜", percent: 52, flow: 3, status: 3, badge: "分镜中" },
-  { text: "正在生成视频切片", percent: 70, flow: 4, status: 3, badge: "切片中" },
-  { text: "正在合成完整视频", percent: 88, flow: 5, status: 4, badge: "合成中" },
-  { text: "生成完成，可进行视频裂变", percent: 100, flow: 5, status: 5, badge: "已完成", generated: true }
+  { text: "正在解析参考视频", percent: 35, flow: 1, status: 1, badge: "解析中" },
+  { text: "正在生成视频成片", percent: 72, flow: 2, status: 2, badge: "成片中" },
+  { text: "生成完成，可进行视频裂变", percent: 100, flow: 2, status: 3, badge: "已完成", generated: true }
 ];
 let projectGenerateTimer;
 
@@ -377,7 +374,10 @@ function updateProjectGenerateState(stepIndex) {
   if (fill) fill.style.width = `${step.percent}%`;
   if (statusText) statusText.textContent = step.text;
   if (outputBadge) outputBadge.textContent = step.badge || "生成中";
-  if (outputPanel) outputPanel.classList.toggle("is-generated", Boolean(step.generated));
+  if (outputPanel) {
+    outputPanel.classList.toggle("is-generated", Boolean(step.generated));
+    outputPanel.classList.toggle("is-running", !step.generated);
+  }
   if (fissionButton) fissionButton.disabled = !step.generated;
 
   document.querySelectorAll("[data-project-status-step]").forEach(item => {
@@ -425,8 +425,8 @@ function startProjectFission() {
 
   document.querySelectorAll("[data-project-flow-step]").forEach(item => {
     const index = Number(item.dataset.projectFlowStep);
-    item.classList.toggle("active", index === 6);
-    item.classList.toggle("complete", index < 6);
+    item.classList.toggle("active", index === 3);
+    item.classList.toggle("complete", index < 3);
   });
   document.querySelectorAll(".project-flow-steps i").forEach(line => line.classList.add("complete"));
 
@@ -448,7 +448,7 @@ function startProjectGenerate() {
   clearInterval(projectGenerateTimer);
   const outputPanel = document.querySelector(".project-output-panel");
   const fissionButton = document.querySelector("[data-project-fission]");
-  if (outputPanel) outputPanel.classList.remove("is-generated", "is-fission");
+  if (outputPanel) outputPanel.classList.remove("is-generated", "is-fission", "is-running");
   if (fissionButton) {
     fissionButton.disabled = true;
     fissionButton.textContent = "裂变 5 个";
@@ -672,6 +672,22 @@ document.addEventListener("click", event => {
     event.preventDefault();
     projectOption.parentElement.querySelectorAll("button").forEach(button => {
       button.classList.toggle("active", button === projectOption);
+    });
+    return;
+  }
+
+  const projectSelectFilter = event.target.closest("[data-project-select-filter]");
+  if (projectSelectFilter) {
+    event.preventDefault();
+    const modal = projectSelectFilter.closest(".project-select-modal");
+    const value = projectSelectFilter.dataset.projectSelectFilter;
+    if (!modal) return;
+    modal.querySelectorAll("[data-project-select-filter]").forEach(button => {
+      button.classList.toggle("active", button === projectSelectFilter);
+    });
+    modal.querySelectorAll("[data-project-select-category]").forEach(card => {
+      const category = card.dataset.projectSelectCategory || "";
+      card.hidden = value !== "all" && !category.includes(value);
     });
     return;
   }
