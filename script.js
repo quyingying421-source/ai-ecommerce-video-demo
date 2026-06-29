@@ -87,8 +87,11 @@ document.getElementById("nav").addEventListener("click", event => {
 });
 
 // 弹窗打开关闭
+let productUploadTimer;
+
 function closeModals() {
   document.querySelectorAll(".modal-backdrop.active").forEach(panel => panel.classList.remove("active"));
+  clearTimeout(productUploadTimer);
 }
 
 // 音色库交互
@@ -224,10 +227,34 @@ function startModelFiveViewGeneration() {
   }, 1800);
 }
 
+function addModelEditTag(input) {
+  const value = input.value.trim();
+  if (!value) return;
+  const list = input.closest(".form-field")?.querySelector("[data-model-edit-tags]");
+  if (!list) return;
+  const exists = Array.from(list.querySelectorAll(".model-edit-tag")).some(tag => tag.firstChild?.textContent?.trim() === value);
+  if (exists) {
+    input.value = "";
+    return;
+  }
+  const tag = document.createElement("button");
+  tag.className = "model-edit-tag";
+  tag.type = "button";
+  tag.append(document.createTextNode(value));
+  const close = document.createElement("span");
+  close.setAttribute("aria-hidden", "true");
+  close.textContent = "×";
+  tag.append(close);
+  list.append(tag);
+  input.value = "";
+}
+
 function openModal(name, trigger) {
   closeModals();
   if (name === "voice-upload") updateVoiceModalMode(trigger);
   if (name === "model-create") resetModelCreateModal();
+  if (name === "product-upload") resetProductUploadModal();
+  if (name === "product-edit") applyProductDetailData();
   const panel = document.querySelector(`[data-modal-panel="${name}"]`);
   if (panel) {
     if (name === "product-upload") {
@@ -299,10 +326,10 @@ function applyTaskFilters() {
 
 // 创建项目生成流程
 const projectResourceMap = {
-  video: { badge: "projectVideoBadge", meta: "projectVideoMeta", prefix: "已选择" },
-  product: { badge: "projectProductBadge", meta: "projectProductMeta", prefix: "已选择" },
-  model: { badge: "projectModelBadge", meta: "projectModelMeta", prefix: "已选择" },
-  voice: { badge: "projectVoiceBadge", meta: "projectVoiceMeta", prefix: "已选择音色" }
+  video: { label: "参考视频", prefix: "已选参考" },
+  product: { label: "产品图", prefix: "已选商品" },
+  model: { label: "模特图", prefix: "已选模特" },
+  voice: { label: "上传音色", prefix: "已选音色" }
 };
 
 function setBadgeState(el, state) {
@@ -314,26 +341,27 @@ function setBadgeState(el, state) {
 function selectResource(type, label, meta) {
   const config = projectResourceMap[type];
   if (!config) return;
-  const badge = document.getElementById(config.badge);
-  const metaEl = document.getElementById(config.meta);
-  if (badge) {
-    badge.textContent = `${config.prefix}：${label}`;
-    setBadgeState(badge, "success");
+  const resourceButton = document.querySelector(`[data-project-resource="${type}"]`);
+  if (resourceButton) {
+    const icon = resourceButton.querySelector(".project-attach-icon");
+    resourceButton.textContent = `${config.prefix}`;
+    if (icon) resourceButton.prepend(icon);
+    resourceButton.classList.add("is-selected");
+    resourceButton.title = label;
   }
-  if (metaEl && meta) metaEl.textContent = meta;
   closeModals();
   const navButton = document.querySelector('button[data-page="project"]');
   show("project", navButton);
-  showToast(`${label}已用于当前项目`);
+  showToast(meta || `${label}已用于当前项目`);
 }
 
 const projectGenerateSteps = [
-  { text: "正在解析参考视频", percent: 18, stage: 2, status: 1 },
-  { text: "正在解析脚本", percent: 34, stage: 2, status: 2 },
-  { text: "正在生成视频切片", percent: 58, stage: 2, status: 3 },
-  { text: "正在合成视频", percent: 76, stage: 2, status: 4 },
-  { text: "正在执行视频裂变", percent: 92, stage: 3, status: 5 },
-  { text: "生成完成，可在任务记录查看", percent: 100, stage: 3, status: 5 }
+  { text: "正在解析参考视频", percent: 18, flow: 1, status: 1, badge: "解析中" },
+  { text: "正在生成替换脚本", percent: 34, flow: 2, status: 2, badge: "脚本中" },
+  { text: "正在生成九宫格分镜", percent: 52, flow: 3, status: 3, badge: "分镜中" },
+  { text: "正在生成视频切片", percent: 70, flow: 4, status: 3, badge: "切片中" },
+  { text: "正在合成完整视频", percent: 88, flow: 5, status: 4, badge: "合成中" },
+  { text: "生成完成，可进行视频裂变", percent: 100, flow: 5, status: 5, badge: "已完成", generated: true }
 ];
 let projectGenerateTimer;
 
@@ -342,12 +370,28 @@ function updateProjectGenerateState(stepIndex) {
   const percent = document.getElementById("projectProgressPercent");
   const fill = document.getElementById("projectProgressFill");
   const statusText = document.getElementById("projectCurrentStatus");
+  const outputPanel = document.querySelector(".project-output-panel");
+  const outputBadge = document.querySelector("[data-project-output-badge]");
+  const fissionButton = document.querySelector("[data-project-fission]");
   if (percent) percent.textContent = `${step.percent}%`;
   if (fill) fill.style.width = `${step.percent}%`;
   if (statusText) statusText.textContent = step.text;
+  if (outputBadge) outputBadge.textContent = step.badge || "生成中";
+  if (outputPanel) outputPanel.classList.toggle("is-generated", Boolean(step.generated));
+  if (fissionButton) fissionButton.disabled = !step.generated;
 
   document.querySelectorAll("[data-project-status-step]").forEach(item => {
     item.classList.toggle("active", Number(item.dataset.projectStatusStep) === step.status);
+  });
+
+  document.querySelectorAll("[data-project-flow-step]").forEach(item => {
+    const index = Number(item.dataset.projectFlowStep);
+    item.classList.toggle("active", index === step.flow);
+    item.classList.toggle("complete", index < step.flow || (step.generated && index === step.flow));
+  });
+
+  document.querySelectorAll(".project-flow-steps i").forEach((line, index) => {
+    line.classList.toggle("complete", index + 1 < step.flow || (step.generated && index + 1 === step.flow));
   });
 
   document.querySelectorAll("[data-project-stage]").forEach(stageEl => {
@@ -361,11 +405,54 @@ function updateProjectGenerateState(stepIndex) {
   });
 }
 
+function startProjectFission() {
+  const outputPanel = document.querySelector(".project-output-panel");
+  const outputBadge = document.querySelector("[data-project-output-badge]");
+  const statusText = document.getElementById("projectCurrentStatus");
+  const fissionButton = document.querySelector("[data-project-fission]");
+  if (!outputPanel?.classList.contains("is-generated")) {
+    showToast("请先生成成片");
+    return;
+  }
+
+  outputPanel.classList.add("is-fission");
+  if (outputBadge) outputBadge.textContent = "裂变中";
+  if (statusText) statusText.textContent = "正在生成 5 个场景裂变视频";
+  if (fissionButton) {
+    fissionButton.disabled = true;
+    fissionButton.textContent = "裂变中";
+  }
+
+  document.querySelectorAll("[data-project-flow-step]").forEach(item => {
+    const index = Number(item.dataset.projectFlowStep);
+    item.classList.toggle("active", index === 6);
+    item.classList.toggle("complete", index < 6);
+  });
+  document.querySelectorAll(".project-flow-steps i").forEach(line => line.classList.add("complete"));
+
+  setTimeout(() => {
+    if (outputBadge) outputBadge.textContent = "裂变完成";
+    if (statusText) statusText.textContent = "已生成 5 个场景裂变视频";
+    if (fissionButton) {
+      fissionButton.disabled = false;
+      fissionButton.textContent = "再裂变 5 个";
+    }
+    showToast("已生成 5 个裂变视频");
+  }, 900);
+}
+
 function startProjectGenerate() {
   closeModals();
   show("project", document.querySelector('button[data-page="project"]'));
   showToast("生成任务已提交");
   clearInterval(projectGenerateTimer);
+  const outputPanel = document.querySelector(".project-output-panel");
+  const fissionButton = document.querySelector("[data-project-fission]");
+  if (outputPanel) outputPanel.classList.remove("is-generated", "is-fission");
+  if (fissionButton) {
+    fissionButton.disabled = true;
+    fissionButton.textContent = "裂变 5 个";
+  }
   let stepIndex = 0;
   updateProjectGenerateState(stepIndex);
   projectGenerateTimer = setInterval(() => {
@@ -421,6 +508,47 @@ const uploadSlotRules = {
   }
 };
 
+let currentProductDetail = {
+  title: "意大利头层牛皮手提包",
+  category: "服装",
+  image: "assets/product-cover-01.png"
+};
+
+function applyProductDetailData() {
+  const detailPanel = document.querySelector('[data-modal-panel="product-detail"]');
+  const editPanel = document.querySelector('[data-modal-panel="product-edit"]');
+  const detailTitle = detailPanel?.querySelector("[data-product-detail-title]");
+  const detailCategory = detailPanel?.querySelector("[data-product-detail-category]");
+  const detailCategoryText = detailPanel?.querySelector("[data-product-detail-category-text]");
+  const detailHero = detailPanel?.querySelector("[data-product-detail-hero]");
+  const editTitle = editPanel?.querySelector("[data-product-edit-title]");
+  const editCategoryLabel = editPanel?.querySelector("[data-product-edit-category-label]");
+  const editHero = editPanel?.querySelector("[data-product-edit-hero]");
+  const editName = editPanel?.querySelector("[data-product-edit-name]");
+  const editCategory = editPanel?.querySelector("[data-product-edit-category]");
+  if (detailTitle) detailTitle.textContent = currentProductDetail.title;
+  if (detailCategory) detailCategory.textContent = currentProductDetail.category;
+  if (detailCategoryText) detailCategoryText.textContent = currentProductDetail.category;
+  if (detailHero) detailHero.src = currentProductDetail.image;
+  if (editTitle) editTitle.textContent = currentProductDetail.title;
+  if (editCategoryLabel) editCategoryLabel.textContent = currentProductDetail.category;
+  if (editHero) editHero.src = currentProductDetail.image;
+  if (editName) editName.value = currentProductDetail.title;
+  if (editCategory) editCategory.value = currentProductDetail.category;
+}
+
+function hydrateProductDetail(card) {
+  const title = card.querySelector(".product-card-copy h3")?.textContent?.trim();
+  const category = card.dataset.category || "服装";
+  const image = card.querySelector(".product-image img")?.getAttribute("src");
+  currentProductDetail = {
+    title: title || currentProductDetail.title,
+    category,
+    image: image || currentProductDetail.image
+  };
+  applyProductDetailData();
+}
+
 function updateUploadSlots(category, root = document) {
   const slots = root.querySelector("[data-product-upload-slots]") || document.getElementById("productUploadSlots");
   if (!slots) return;
@@ -438,6 +566,64 @@ function updateUploadSlots(category, root = document) {
     slot.appendChild(body);
     slots.appendChild(slot);
   });
+}
+
+function getProductUploadModal() {
+  return document.querySelector('[data-modal-panel="product-upload"] .product-create-modal');
+}
+
+function syncProductNameCount(panel) {
+  const input = panel?.querySelector("[data-product-name-input]");
+  const count = panel?.querySelector("[data-product-name-count]");
+  if (input && count) count.textContent = String(input.value.length);
+}
+
+function syncProductResult(panel) {
+  const activeCategory = panel.querySelector("[data-upload-category].active")?.dataset.uploadCategory || "服装";
+  const name = panel.querySelector("[data-product-name-input]")?.value?.trim() || "白色运动休闲鞋";
+  const resultSelect = panel.querySelector('.product-result-form select.form-control');
+  const resultName = panel.querySelector('.product-result-form input.form-control');
+  if (resultSelect) resultSelect.value = activeCategory;
+  if (resultName) resultName.value = name;
+}
+
+function setProductUploadStep(step) {
+  const panel = getProductUploadModal();
+  if (!panel) return;
+  const safeStep = Math.min(4, Math.max(1, Number(step) || 1));
+  panel.dataset.productUploadStep = String(safeStep);
+  panel.querySelectorAll("[data-product-step-panel]").forEach(item => {
+    item.classList.toggle("active", Number(item.dataset.productStepPanel) === safeStep);
+  });
+  panel.querySelectorAll("[data-product-step-indicator]").forEach(item => {
+    const index = Number(item.dataset.productStepIndicator);
+    item.classList.toggle("active", index === safeStep);
+    item.classList.toggle("complete", index < safeStep);
+  });
+  panel.querySelectorAll(".product-stepper i").forEach((line, index) => {
+    line.classList.toggle("complete", index + 1 < safeStep);
+  });
+  const next = panel.querySelector("[data-product-upload-next]");
+  if (next) next.textContent = safeStep === 2 ? "提交图片" : "下一步";
+  if (safeStep === 4) syncProductResult(panel);
+}
+
+function resetProductUploadModal() {
+  clearTimeout(productUploadTimer);
+  const panel = getProductUploadModal();
+  if (!panel) return;
+  const activeCategory = panel.querySelector("[data-upload-category].active")?.dataset.uploadCategory || "服装";
+  updateUploadSlots(activeCategory, panel);
+  syncProductNameCount(panel);
+  setProductUploadStep(1);
+}
+
+function startProductUploadAnalysis() {
+  clearTimeout(productUploadTimer);
+  setProductUploadStep(3);
+  productUploadTimer = setTimeout(() => {
+    setProductUploadStep(4);
+  }, 1600);
 }
 
 function runProductAnalysis(trigger) {
@@ -471,6 +657,56 @@ document.addEventListener("click", event => {
   if (generateTrigger) {
     event.preventDefault();
     startProjectGenerate();
+    return;
+  }
+
+  const projectFission = event.target.closest("[data-project-fission]");
+  if (projectFission) {
+    event.preventDefault();
+    startProjectFission();
+    return;
+  }
+
+  const projectOption = event.target.closest('.page[data-page="project"] .project-chip-group button');
+  if (projectOption) {
+    event.preventDefault();
+    projectOption.parentElement.querySelectorAll("button").forEach(button => {
+      button.classList.toggle("active", button === projectOption);
+    });
+    return;
+  }
+
+  const productNext = event.target.closest("[data-product-upload-next]");
+  if (productNext) {
+    event.preventDefault();
+    const modal = productNext.closest(".product-create-modal");
+    const step = Number(modal?.dataset.productUploadStep || 1);
+    if (step === 1) setProductUploadStep(2);
+    if (step === 2) startProductUploadAnalysis();
+    return;
+  }
+
+  const productPrev = event.target.closest("[data-product-upload-prev]");
+  if (productPrev) {
+    event.preventDefault();
+    const modal = productPrev.closest(".product-create-modal");
+    const step = Number(modal?.dataset.productUploadStep || 1);
+    setProductUploadStep(step === 4 ? 2 : step - 1);
+    return;
+  }
+
+  const productCancel = event.target.closest("[data-product-upload-cancel]");
+  if (productCancel) {
+    event.preventDefault();
+    closeModals();
+    return;
+  }
+
+  const productCard = event.target.closest('.page[data-page="materials"] .product-card');
+  if (productCard) {
+    event.preventDefault();
+    hydrateProductDetail(productCard);
+    openModal("product-detail", productCard);
     return;
   }
 
@@ -534,6 +770,13 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const modelEditTag = event.target.closest('[data-modal-panel="model-edit"] .model-edit-tag');
+  if (modelEditTag) {
+    event.preventDefault();
+    modelEditTag.remove();
+    return;
+  }
+
   const toastTrigger = event.target.closest("[data-toast]");
   if (toastTrigger) {
     event.preventDefault();
@@ -578,7 +821,9 @@ document.addEventListener("click", event => {
   const uploadCategory = event.target.closest("[data-upload-category]");
   if (uploadCategory) {
     uploadCategory.parentElement.querySelectorAll("[data-upload-category]").forEach(item => item.classList.toggle("active", item === uploadCategory));
-    updateUploadSlots(uploadCategory.dataset.uploadCategory, uploadCategory.closest(".modal") || document);
+    const modal = uploadCategory.closest(".modal") || document;
+    updateUploadSlots(uploadCategory.dataset.uploadCategory, modal);
+    if (modal.classList?.contains("product-create-modal")) syncProductResult(modal);
     return;
   }
 
@@ -679,7 +924,22 @@ document.addEventListener("change", event => {
   if (voiceAudioInput) renderVoiceAudioFile(voiceAudioInput);
 });
 
+document.addEventListener("input", event => {
+  const productNameInput = event.target.closest("[data-product-name-input]");
+  if (productNameInput) {
+    const modal = productNameInput.closest(".product-create-modal");
+    syncProductNameCount(modal);
+    syncProductResult(modal);
+  }
+});
+
 document.addEventListener("keydown", event => {
+  const modelEditTagInput = event.target.closest("[data-model-edit-tag-input]");
+  if (modelEditTagInput && event.key === "Enter") {
+    event.preventDefault();
+    addModelEditTag(modelEditTagInput);
+    return;
+  }
   if (event.key === "Escape") closeModals();
   if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-voice-audio-uploader]")) {
     event.preventDefault();
