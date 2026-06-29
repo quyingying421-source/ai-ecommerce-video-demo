@@ -70,103 +70,77 @@
       </section>
 
       <section class="page" data-page="project">
-        <div class="project-workbench">
-          <div class="project-input-panel">
+        <div class="project-creation">
+          <div class="project-hero-composer">
+            <div class="project-hero-slogan"><img src="assets/project-video-slogan-icon.png" alt="">开启你的 <span>电商视频生成</span> 即刻种草！</div>
             <div class="project-prompt-card">
-              <label class="prompt-label required">需求描述</label>
               <div class="project-prompt-shell">
-                <div class="project-prompt-box" contenteditable="true">例如：参考爆款视频节奏，为白色运动休闲鞋生成一条适合抖音投放的口播短视频，突出轻量、透气、耐磨鞋底和通勤百搭。</div>
-                <div class="composer-toolbar project-attach-row">
-                  <button class="pill-btn project-attach-btn" type="button" data-modal="project-video-select" data-project-resource="video"><span class="project-attach-icon video"></span>参考视频</button>
-                  <button class="pill-btn project-attach-btn" type="button" data-modal="project-product-select" data-project-resource="product"><span class="project-attach-icon product"></span>产品图</button>
-                  <button class="pill-btn project-attach-btn" type="button" data-modal="project-model-select" data-project-resource="model"><span class="project-attach-icon model"></span>模特图</button>
-                  <button class="pill-btn project-attach-btn" type="button" data-modal="project-voice-select" data-project-resource="voice"><span class="project-attach-icon voice"></span>上传音色</button>
+                <div class="project-prompt-box" contenteditable="true">描述你想生成的视频，例如：帮我生成一个15秒的鞋子种草视频</div>
+                <div class="project-composer-bottom">
+                  <div class="composer-toolbar project-attach-row">
+                    <button class="pill-btn project-attach-btn" type="button" data-modal="project-video-select" data-project-resource="video"><span class="project-attach-icon video"></span>参考视频</button>
+                    <button class="pill-btn project-attach-btn" type="button" data-modal="project-product-select" data-project-resource="product"><span class="project-attach-icon product"></span>上传商品图</button>
+                    <button class="pill-btn project-attach-btn" type="button" data-modal="project-model-select" data-project-resource="model"><span class="project-attach-icon model"></span>上传模特</button>
+                    <button class="pill-btn project-attach-btn" type="button" data-modal="project-voice-select" data-project-resource="voice"><span class="project-attach-icon voice"></span>上传音色</button>
+                  </div>
+                  <div class="project-param-summary" aria-label="参数设置">
+                    <span>16:9</span><i></i><span>720p</span><i></i><span>背景音乐</span><i></i><span>人声</span>
+                  </div>
+                  <button class="btn primary project-generate-btn" type="button" data-start-generate><span class="project-generate-icon"></span>生成 <em>3</em></button>
                 </div>
               </div>
-            </div>
-            <div class="project-params-card">
-              <div class="project-param-grid">
-                <label class="project-select-field"><span class="required">视频比例</span><select><option>9:16 竖版</option><option>3:4 竖版</option><option>1:1 方形</option><option>16:9 横版</option></select></label>
-                <label class="project-select-field"><span class="required">视频时长</span><select><option>15-30 秒</option><option>30-45 秒</option><option>45-60 秒</option></select></label>
-                <div class="project-filter-field wide"><span class="required">输出语言</span><div class="project-chip-group"><button class="active" type="button">中文</button><button type="button">英文</button></div></div>
-                <div class="project-radio-row wide">
-                  <div class="project-radio-title"><span class="required">背景音乐</span><em>自动生成与画面匹配的背景音乐</em></div>
-                  <div class="project-radio-group">
-                    <label><input type="radio" name="project-bgm" checked><span>开启</span></label>
-                    <label><input type="radio" name="project-bgm"><span>不开启</span></label>
-                  </div>
-                </div>
-                <div class="project-radio-row wide">
-                  <div class="project-radio-title"><span class="required">人声口播</span><em>使用所选音色生成口播人声</em></div>
-                  <div class="project-radio-group">
-                    <label><input type="radio" name="project-voiceover" checked><span>开启</span></label>
-                    <label><input type="radio" name="project-voiceover"><span>不开启</span></label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="project-action-bar">
-              <button class="btn primary" type="button" data-modal="confirm-generate">立即生成</button>
             </div>
           </div>
-          <div class="project-output-panel">
-            <div class="project-panel-head">
-              <div>
-                <h3>视频工作台</h3>
-                <p>按步骤展示生成过程、视频切片、成片和裂变结果。</p>
+
+          <div class="project-video-board">
+            <div class="project-board-section">
+              <div class="project-board-head">
+                <div class="project-board-tabs">
+                  <button class="active" type="button" data-project-video-tab="plaza">视频广场</button>
+                  <button type="button" data-project-video-tab="mine">我的视频</button>
+                </div>
               </div>
-            </div>
-            <div class="project-flow-steps">
-              <span class="active" data-project-flow-step="1"><b>1</b>解析</span><i></i>
-              <span data-project-flow-step="2"><b>2</b>成片</span><i></i>
-              <span data-project-flow-step="3"><b>3</b>裂变</span>
-            </div>
-            <div class="project-output-grid">
-              <div class="project-canvas-card">
-                <div class="project-canvas-head">
-                  <div><strong>内容区域</strong><span id="projectCurrentStatus">等待提交生成任务</span></div>
-                  <span class="badge info" data-project-output-badge>空白</span>
+              <div class="project-video-panel active" data-project-video-panel="plaza">
+                <div class="pill-row section project-board-toolbar">
+                  <button class="pill-btn active plain" type="button">全部</button>
+                  <button class="pill-btn" type="button"><span class="plaza-icon clothes"></span>服装</button>
+                  <button class="pill-btn" type="button"><span class="plaza-icon inner"></span>内衣</button>
+                  <button class="pill-btn" type="button"><span class="plaza-icon bag"></span>箱包</button>
+                  <button class="pill-btn" type="button"><span class="plaza-icon beauty"></span>配饰</button>
+                  <button class="pill-btn" type="button"><span class="plaza-icon hat"></span>帽子</button>
+                  <div class="square-search">搜索参考视频 / 商品类目 / 标签</div>
                 </div>
-                <div class="project-empty-state">
-                  <strong>视频生成后展示在这里</strong>
-                  <p>包括参考视频解析、九宫格分镜、视频切片、合成成片和裂变视频。</p>
+                <div class="project-video-list">
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-01.png" alt=""><span class="poster-badge poster-category">女装</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">白色小香风套装街拍种草</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-02.png" alt=""><span class="poster-badge poster-category">服装</span><span class="poster-badge poster-feature">热门</span><span class="poster-play"></span><span class="poster-title">小香风外套日常通勤口播</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-03.png" alt=""><span class="poster-badge poster-category">服装</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">蓝色防晒外套少女感穿搭</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-04.png" alt=""><span class="poster-badge poster-category">女装</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">无袖背心阔腿裤简约穿搭</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-05.png" alt=""><span class="poster-badge poster-category">女装</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">风车草地半身裙度假穿搭</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-06.png" alt=""><span class="poster-badge poster-category">箱包</span><span class="poster-badge poster-feature">新品</span><span class="poster-play"></span><span class="poster-title">都市托特包多场景展示</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-07.png" alt=""><span class="poster-badge poster-category">箱包</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">通勤托特包场景化种草</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-08.png" alt=""><span class="poster-badge poster-category">鞋子</span><span class="poster-badge poster-feature">热门</span><span class="poster-play"></span><span class="poster-title">运动鞋轻量透气卖点视频</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-09.png" alt=""><span class="poster-badge poster-category">内衣</span><span class="poster-badge poster-feature">精选</span><span class="poster-play"></span><span class="poster-title">轻薄内衣细节展示模板</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-10.png" alt=""><span class="poster-badge poster-category">配饰</span><span class="poster-badge poster-feature">新品</span><span class="poster-play"></span><span class="poster-title">夏日配饰氛围感短视频</span></div></article>
                 </div>
-                <div class="project-video-stage">
-                  <div class="project-main-video">
-                    <span>9:16</span>
-                    <strong>成片预览</strong>
-                  </div>
-                  <div class="project-stage-side">
-                    <div class="project-segment-grid">
-                      <div><b>#1</b><span>脚本</span></div>
-                      <div><b>#2</b><span>分镜</span></div>
-                      <div><b>#3</b><span>切片</span></div>
-                      <div><b>#4</b><span>合成</span></div>
-                    </div>
-                    <div class="project-fission-results">
-                      <strong>裂变结果</strong>
-                      <div class="project-fission-grid">
-                        <div><b>1</b><span>通勤场景</span></div>
-                        <div><b>2</b><span>户外场景</span></div>
-                        <div><b>3</b><span>居家场景</span></div>
-                        <div><b>4</b><span>街拍场景</span></div>
-                        <div><b>5</b><span>促销场景</span></div>
-                      </div>
-                    </div>
-                    <div class="project-fission-card">
-                      <div><strong>视频裂变</strong><p>成片后可一键裂变 5 个不同场景视频。</p></div>
-                      <button class="btn primary" type="button" data-project-fission disabled>裂变 5 个</button>
-                    </div>
-                  </div>
+              </div>
+              <div class="project-video-panel" data-project-video-panel="mine">
+                <div class="pill-row section project-board-toolbar">
+                  <button class="pill-btn active" type="button">全部</button>
+                  <button class="pill-btn" type="button">已成片</button>
+                  <button class="pill-btn" type="button">已裂变</button>
+                  <div class="square-search">搜索我的视频</div>
                 </div>
-                <div class="project-progress-card">
-                  <div class="project-progress-head"><strong>当前进度</strong><span id="projectProgressPercent">0%</span></div>
-                  <div class="project-progress-bar"><span id="projectProgressFill" style="width:0%;"></span></div>
-                  <div class="project-status-list">
-                    <div class="project-status-item active" data-project-status-step="1"><span></span>参考视频解析</div>
-                    <div class="project-status-item" data-project-status-step="2"><span></span>视频成片生成</div>
-                    <div class="project-status-item" data-project-status-step="3"><span></span>可进行视频裂变</div>
-                  </div>
+                <div class="project-video-list">
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/task-video-cover.png" alt=""><span class="poster-badge poster-category">成片</span><span class="poster-play"></span><span class="poster-title">夏季防晒衣穿搭口播生成</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-07.png" alt=""><span class="poster-badge poster-category">裂变</span><span class="poster-play"></span><span class="poster-title">通勤托特包多场景视频</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-08.png" alt=""><span class="poster-badge poster-category">成片</span><span class="poster-play"></span><span class="poster-title">运动鞋卖点口播成片</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-09.png" alt=""><span class="poster-badge poster-category">草稿</span><span class="poster-play"></span><span class="poster-title">轻薄内衣细节展示视频</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-01.png" alt=""><span class="poster-badge poster-category">成片</span><span class="poster-play"></span><span class="poster-title">白色小香风套装复刻成片</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-02.png" alt=""><span class="poster-badge poster-category">裂变</span><span class="poster-play"></span><span class="poster-title">外套通勤场景裂变视频</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-03.png" alt=""><span class="poster-badge poster-category">成片</span><span class="poster-play"></span><span class="poster-title">防晒外套少女感口播成片</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-04.png" alt=""><span class="poster-badge poster-category">草稿</span><span class="poster-play"></span><span class="poster-title">阔腿裤简约穿搭草稿</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-05.png" alt=""><span class="poster-badge poster-category">裂变</span><span class="poster-play"></span><span class="poster-title">度假半身裙五场景裂变</span></div></article>
+                  <article class="gallery-card plaza-video-card project-mini-video-card" data-modal="video-detail"><div class="poster plaza-poster"><img class="poster-image" src="assets/plaza-covers/plaza-10.png" alt=""><span class="poster-badge poster-category">成片</span><span class="poster-play"></span><span class="poster-title">夏日配饰氛围短片成片</span></div></article>
                 </div>
               </div>
             </div>
@@ -384,7 +358,7 @@
                   </div>
                 </div>
                 <div class="task-actions">
-                  <button class="btn primary" type="button" data-modal="task-progress">查看详情</button>
+                  <button class="btn primary" type="button" data-task-project-detail="task-1">查看详情</button>
                 </div>
               </article>
 
@@ -408,7 +382,7 @@
                   </div>
                 </div>
                 <div class="task-actions">
-                  <button class="btn primary" type="button" data-modal="task-result">查看详情</button>
+                  <button class="btn primary" type="button" data-task-project-detail="task-2">查看详情</button>
                 </div>
               </article>
 
@@ -432,7 +406,7 @@
                   </div>
                 </div>
                 <div class="task-actions">
-                  <button class="btn primary" type="button" data-modal="product-detail">查看详情</button>
+                  <button class="btn primary" type="button" data-task-project-detail="task-3">查看详情</button>
                 </div>
               </article>
 
@@ -461,7 +435,7 @@
                 </div>
                 <div class="task-actions">
                   <span class="badge info task-action-tag"><span class="task-action-tag-icon"></span>裂变</span>
-                  <button class="btn primary" type="button" data-modal="task-fail">查看详情</button>
+                  <button class="btn primary" type="button" data-task-project-detail="task-4">查看详情</button>
                 </div>
               </article>
               <div class="task-empty" id="taskEmpty">当前筛选条件下暂无任务记录</div>
@@ -480,6 +454,132 @@
       </section>
     </main>
   </div>
+
+  <section class="project-generate-page" data-project-generate-page>
+    <header class="project-generate-header">
+      <button class="btn" type="button" data-project-generate-back>返回</button>
+      <div class="project-generate-title">
+        <span class="badge info">视频生成</span>
+        <div><strong>项目-2026/6/29 15:30:00</strong><p>参考视频解析、商品匹配、成片合成与裂变结果集中展示</p></div>
+      </div>
+      <div class="project-generate-head-actions">
+        <span class="pill-btn">自动保存</span>
+      </div>
+    </header>
+    <div class="project-generate-shell">
+      <aside class="project-selected-rail">
+        <div class="project-selected-head">
+          <h3>项目素材</h3>
+          <p>本次生成将复用这些素材的风格、商品和音色</p>
+        </div>
+        <div class="project-selected-card hero">
+          <span class="project-selected-card-label">已选视频</span>
+          <div class="project-selected-cover"><img src="assets/plaza-covers/plaza-04.png" alt=""><b>参考视频</b></div>
+          <div>
+            <strong data-project-selected-video>无袖背心阔腿裤简约穿搭</strong>
+            <p>镜头节奏、构图和口播结构将作为本次生成参考。</p>
+          </div>
+        </div>
+        <div class="project-selected-card">
+          <span class="project-selected-card-label">已选商品图</span>
+          <div class="project-selected-image"><img src="assets/product-cover-01.png" alt=""></div>
+          <div>
+            <strong data-project-selected-product>白色运动休闲鞋</strong>
+            <p>5 张视角图，Logo 与材质细节已校验。</p>
+          </div>
+        </div>
+        <div class="project-selected-card">
+          <span class="project-selected-card-label">已选模特</span>
+          <div class="project-selected-image"><img src="assets/model-detail-source.png" alt=""></div>
+          <div>
+            <strong data-project-selected-model>都市通勤女模特</strong>
+            <p>五视图已生成，适合通勤穿搭和鞋服展示。</p>
+          </div>
+        </div>
+        <div class="project-selected-card compact">
+          <span class="project-selected-card-label">已选音色</span>
+          <img src="assets/voice-avatars/warm-female.png" alt="">
+          <div>
+            <strong data-project-selected-voice>清爽女声</strong>
+            <p>自然 / 轻快，适合短视频种草口播。</p>
+          </div>
+        </div>
+      </aside>
+      <main class="project-generate-main">
+        <div class="project-generate-workspace">
+          <div class="project-flow-steps project-generate-flow">
+            <span class="active" data-project-flow-step="1"><b>1</b>视频解析</span><i></i>
+            <span data-project-flow-step="2"><b>2</b>生成成片</span><i></i>
+            <span data-project-flow-step="3"><b>3</b>视频裂变</span>
+          </div>
+          <section class="project-generate-stage">
+            <div class="project-generate-copy">
+              <div>
+                <strong data-project-output-badge>解析中</strong>
+                <h3 id="projectCurrentStatus">正在解析参考视频</h3>
+                <p>系统会提取参考视频节奏、镜头结构、卖点表达，并结合商品图、模特和音色生成成片。</p>
+              </div>
+              <div class="project-progress-card">
+                <div class="project-progress-head"><strong>当前进度</strong><span id="projectProgressPercent">0%</span></div>
+                <div class="project-progress-bar"><span id="projectProgressFill" style="width:0%;"></span></div>
+                <div class="project-status-list">
+                  <div class="project-status-item active" data-project-status-step="1"><span></span><div><strong>参考视频解析</strong><small>识别分镜、节奏和口播结构</small></div></div>
+                  <div class="project-status-item" data-project-status-step="2"><span></span><div><strong>视频成片生成</strong><small>合成商品、模特、文案与音色</small></div></div>
+                  <div class="project-status-item" data-project-status-step="3"><span></span><div><strong>可进行视频裂变</strong><small>生成更多场景与表达版本</small></div></div>
+                </div>
+              </div>
+              <div class="project-fission-entry">
+                <div><strong>视频裂变</strong><p>成片后可一键裂变为多个不同风格的短视频。</p></div>
+                <div class="project-fission-control">
+                  <label>裂变数量
+                    <select data-project-fission-count>
+                      <option value="1">1 条</option><option value="2">2 条</option><option value="3">3 条</option><option value="4">4 条</option><option value="5" selected>5 条</option><option value="6">6 条</option><option value="7">7 条</option><option value="8">8 条</option><option value="9">9 条</option><option value="10">10 条</option><option value="11">11 条</option><option value="12">12 条</option>
+                    </select>
+                  </label>
+                  <button class="btn primary project-fission-action" type="button" data-project-fission disabled><span>一键裂变</span><i><img src="assets/rongdou-bean-icon.png" alt=""><b data-project-fission-cost>15</b></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="project-generation-preview">
+              <div class="project-preview-head">
+                <div><strong>成片预览</strong><p>竖版 9:16 · 15 秒 · 商品种草</p></div>
+                <div class="project-preview-actions">
+                  <button class="btn" type="button" data-toast="成片下载已开始">下载</button>
+                  <span class="badge success">高清</span>
+                </div>
+              </div>
+              <div class="project-generation-canvas">
+                <div class="project-generation-phone" data-modal="video-detail">
+                  <img class="poster-image" src="assets/task-video-cover.png" alt="">
+                  <span class="poster-play" aria-hidden="true"></span>
+                  <span class="poster-title" data-project-preview-title>正在生成</span>
+                  <span class="poster-category">成片</span>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="project-fission-workspace">
+            <div class="project-fission-workspace-head"><div><strong>裂变结果</strong><p>围绕商品卖点生成不同场景、口播和节奏版本。</p></div><span>已生成 0 个</span></div>
+            <div class="project-fission-result-grid">
+              <div><b>#1</b><span>待生成</span></div><div><b>#2</b><span>待生成</span></div><div><b>#3</b><span>待生成</span></div><div><b>#4</b><span>待生成</span></div><div><b>#5</b><span>待生成</span></div><div><b>#6</b><span>待生成</span></div>
+              <div><b>#7</b><span>待生成</span></div><div><b>#8</b><span>待生成</span></div><div><b>#9</b><span>待生成</span></div><div><b>#10</b><span>待生成</span></div><div><b>#11</b><span>待生成</span></div><div><b>#12</b><span>待生成</span></div>
+            </div>
+            <div class="project-fission-toolbar">
+              <button class="btn" type="button" data-project-back-to-video>上一步</button>
+              <button class="btn" type="button">全选</button>
+              <button class="btn" type="button">下载</button>
+              <label class="project-fission-control compact">裂变数量
+                <select data-project-fission-count>
+                  <option value="1">1 条</option><option value="2">2 条</option><option value="3">3 条</option><option value="4">4 条</option><option value="5" selected>5 条</option><option value="6">6 条</option><option value="7">7 条</option><option value="8">8 条</option><option value="9">9 条</option><option value="10">10 条</option><option value="11">11 条</option><option value="12">12 条</option>
+                </select>
+              </label>
+              <button class="btn primary project-fission-action" type="button" data-project-fission><span>一键裂变</span><i><img src="assets/rongdou-bean-icon.png" alt=""><b data-project-fission-cost>15</b></i></button>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </section>
 
   <div class="modal-backdrop video-detail-backdrop" data-modal-panel="video-detail">
     <div class="modal modal-panel video-detail-modal">
@@ -523,83 +623,138 @@
   </div>
 
   <div class="modal-backdrop" data-modal-panel="project-video-select">
-    <div class="modal modal-panel project-select-modal">
-      <div class="modal-head"><div><h3>选择参考视频</h3><p>当前项目仅可选择 1 个参考视频，用于解析节奏、脚本和镜头结构。</p></div><button class="modal-close" type="button">×</button></div>
-      <div class="modal-body">
-        <div class="project-select-list">
-          <article class="project-select-card"><div class="project-select-thumb video"></div><div><h4>无袖背心阔腿裤简约穿搭</h4><p>来自视频广场，9:16 竖版，适合服装口播复刻。</p></div><button class="btn primary" type="button" data-select-resource="video" data-resource-label="无袖背心阔腿裤简约穿搭" data-resource-meta="已选择 1 个参考视频">选择</button></article>
-          <article class="project-select-card muted"><div class="project-select-thumb upload"></div><div><h4>本地上传参考视频</h4><p>MP4/MOV，后续接入文件上传；当前 demo 先从视频广场选择。</p></div><button class="btn" type="button" data-toast="本地上传后续接入">上传</button></article>
+    <div class="project-select-modal-shell">
+      <button class="modal-close video-detail-close project-select-modal-close" type="button">×</button>
+      <div class="modal modal-panel project-select-modal">
+        <div class="modal-head"><div><h3>添加参考视频</h3><p>当前项目仅可选择 1 个参考视频，可本地上传、复制链接或从我的视频库选择。</p></div></div>
+        <div class="modal-body">
+          <div class="project-ref-tabs">
+            <button class="pill-btn active" type="button" data-project-ref-tab="local">本地上传</button>
+            <button class="pill-btn" type="button" data-project-ref-tab="link">复制链接</button>
+            <button class="pill-btn" type="button" data-project-ref-tab="library">视频库上传</button>
+          </div>
+          <div class="project-ref-panel active" data-project-ref-panel="local">
+            <div class="project-upload-drop">
+              <div class="project-select-thumb upload"></div>
+              <strong>上传本地参考视频</strong>
+              <p>支持 MP4 / MOV，建议 9:16 竖版，系统将解析节奏、镜头和口播结构。</p>
+              <button class="btn primary" type="button" data-select-resource="video" data-resource-label="本地上传参考视频" data-resource-meta="已添加本地参考视频">选择本地视频</button>
+            </div>
+          </div>
+          <div class="project-ref-panel" data-project-ref-panel="link">
+            <div class="project-link-box">
+              <label class="form-field"><span>视频链接</span><input class="form-control" type="text" value="https://example.com/video/demo"></label>
+              <button class="btn primary" type="button" data-select-resource="video" data-resource-label="链接参考视频" data-resource-meta="已添加链接参考视频">解析链接</button>
+            </div>
+          </div>
+          <div class="project-ref-panel" data-project-ref-panel="library">
+            <div class="project-video-library">
+              <article class="project-library-video-card">
+                <img src="assets/task-video-cover.png" alt="">
+                <span class="project-library-title">夏季防晒衣穿搭口播生成</span>
+                <span class="poster-play" aria-hidden="true"></span>
+                <button class="btn primary" type="button" data-select-resource="video" data-resource-label="夏季防晒衣穿搭口播生成" data-resource-meta="已从我的视频库选择参考">选择视频</button>
+              </article>
+              <article class="project-library-video-card">
+                <img src="assets/plaza-covers/plaza-07.png" alt="">
+                <span class="project-library-title">通勤托特包多场景视频</span>
+                <span class="poster-play" aria-hidden="true"></span>
+                <button class="btn primary" type="button" data-select-resource="video" data-resource-label="通勤托特包多场景视频" data-resource-meta="已从我的视频库选择参考">选择视频</button>
+              </article>
+              <article class="project-library-video-card">
+                <img src="assets/plaza-covers/plaza-03.png" alt="">
+                <span class="project-library-title">防晒外套少女感口播成片</span>
+                <span class="poster-play" aria-hidden="true"></span>
+                <button class="btn primary" type="button" data-select-resource="video" data-resource-label="防晒外套少女感口播成片" data-resource-meta="已从我的视频库选择参考">选择视频</button>
+              </article>
+              <article class="project-library-video-card">
+                <img src="assets/plaza-covers/plaza-05.png" alt="">
+                <span class="project-library-title">度假半身裙五场景裂变</span>
+                <span class="poster-play" aria-hidden="true"></span>
+                <button class="btn primary" type="button" data-select-resource="video" data-resource-label="度假半身裙五场景裂变" data-resource-meta="已从我的视频库选择参考">选择视频</button>
+              </article>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="modal-backdrop" data-modal-panel="project-product-select">
-    <div class="modal modal-panel project-select-modal">
-      <div class="modal-head"><div><h3>选择商品素材</h3><p>产品图仅从当前商品素材库调取，确保商品多视图和卖点完整。</p></div><button class="modal-close" type="button">×</button></div>
-      <div class="modal-body">
-        <div class="project-select-filters">
-          <button class="pill-btn active" type="button" data-project-select-filter="all">全部</button>
-          <button class="pill-btn" type="button" data-project-select-filter="鞋子">鞋子</button>
-          <button class="pill-btn" type="button" data-project-select-filter="服装">服装</button>
-          <button class="pill-btn" type="button" data-project-select-filter="箱包">箱包</button>
-          <button class="pill-btn" type="button" data-project-select-filter="配饰">配饰</button>
-        </div>
-        <div class="project-select-list project-select-grid">
-          <article class="project-select-card" data-project-select-category="鞋子"><div class="project-select-thumb image"><img src="assets/product-cover-01.png" alt=""></div><div><h4>白色运动休闲鞋</h4><p>5 张视角图，Logo 已校验，适合通勤和运动场景。</p></div><button class="btn primary" type="button" data-select-resource="product" data-resource-label="白色运动休闲鞋" data-resource-meta="商品素材库：5 张视角图已齐全">选择</button></article>
-          <article class="project-select-card" data-project-select-category="箱包"><div class="project-select-thumb image"><img src="assets/product-cover-04.png" alt=""></div><div><h4>通勤托特包</h4><p>外观和五金 Logo 已识别，适合场景化种草。</p></div><button class="btn" type="button" data-select-resource="product" data-resource-label="通勤托特包" data-resource-meta="商品素材库：外观和五金细节可用">选择</button></article>
-          <article class="project-select-card" data-project-select-category="服装"><div class="project-select-thumb image"><img src="assets/product-cover-02.png" alt=""></div><div><h4>白色运动短袖 T 恤</h4><p>正背面和面料信息已解析，可生成穿搭口播。</p></div><button class="btn" type="button" data-select-resource="product" data-resource-label="白色运动短袖 T 恤" data-resource-meta="商品素材库：正背面和面料信息可用">选择</button></article>
-          <article class="project-select-card" data-project-select-category="服装"><div class="project-select-thumb image"><img src="assets/product-cover-03.png" alt=""></div><div><h4>轻薄无痕内衣套装</h4><p>肩带扣位和纹理清晰，适合细节卖点展示。</p></div><button class="btn" type="button" data-select-resource="product" data-resource-label="轻薄无痕内衣套装" data-resource-meta="商品素材库：细节图和纹理完整">选择</button></article>
-          <article class="project-select-card" data-project-select-category="服装"><div class="project-select-thumb image"><img src="assets/product-cover-01.png" alt=""></div><div><h4>极简抽绳上衣</h4><p>版型、抽绳结构和正背面信息完整。</p></div><button class="btn" type="button" data-select-resource="product" data-resource-label="极简抽绳上衣" data-resource-meta="商品素材库：结构细节完整">选择</button></article>
-          <article class="project-select-card" data-project-select-category="配饰"><div class="project-select-thumb image"><img src="assets/product-cover-03.png" alt=""></div><div><h4>金属腰带扣</h4><p>主体轮廓已识别，适合做 Logo 和材质特写。</p></div><button class="btn" type="button" data-select-resource="product" data-resource-label="金属腰带扣" data-resource-meta="商品素材库：可用于配饰视频">选择</button></article>
+    <div class="project-select-modal-shell">
+      <button class="modal-close video-detail-close project-select-modal-close" type="button">×</button>
+      <div class="modal modal-panel project-select-modal">
+        <div class="modal-head"><div><h3>选择商品素材</h3><p>产品图仅从当前商品素材库调取，确保商品多视图和卖点完整。</p></div></div>
+        <div class="modal-body">
+          <div class="project-select-filters">
+            <button class="pill-btn active" type="button" data-project-select-filter="all">全部</button>
+            <button class="pill-btn" type="button" data-project-select-filter="鞋子">鞋子</button>
+            <button class="pill-btn" type="button" data-project-select-filter="服装">服装</button>
+            <button class="pill-btn" type="button" data-project-select-filter="箱包">箱包</button>
+            <button class="pill-btn" type="button" data-project-select-filter="配饰">配饰</button>
+          </div>
+          <div class="project-select-list project-select-grid">
+            <article class="project-select-card" data-project-select-category="鞋子"><div class="project-select-thumb image"><img src="assets/product-cover-01.png" alt=""></div><div><h4>白色运动休闲鞋</h4><p>5 张视角图，Logo 已校验，适合通勤和运动场景。</p></div><button class="btn primary" type="button" data-select-resource="product" data-resource-label="白色运动休闲鞋" data-resource-meta="商品素材库：5 张视角图已齐全">选择</button></article>
+            <article class="project-select-card" data-project-select-category="箱包"><div class="project-select-thumb image"><img src="assets/product-cover-04.png" alt=""></div><div><h4>通勤托特包</h4><p>外观和五金 Logo 已识别，适合场景化种草。</p></div><button class="btn" type="button" data-select-resource="product" data-resource-label="通勤托特包" data-resource-meta="商品素材库：外观和五金细节可用">选择</button></article>
+            <article class="project-select-card" data-project-select-category="服装"><div class="project-select-thumb image"><img src="assets/product-cover-02.png" alt=""></div><div><h4>白色运动短袖 T 恤</h4><p>正背面和面料信息已解析，可生成穿搭口播。</p></div><button class="btn" type="button" data-select-resource="product" data-resource-label="白色运动短袖 T 恤" data-resource-meta="商品素材库：正背面和面料信息可用">选择</button></article>
+            <article class="project-select-card" data-project-select-category="服装"><div class="project-select-thumb image"><img src="assets/product-cover-03.png" alt=""></div><div><h4>轻薄无痕内衣套装</h4><p>肩带扣位和纹理清晰，适合细节卖点展示。</p></div><button class="btn" type="button" data-select-resource="product" data-resource-label="轻薄无痕内衣套装" data-resource-meta="商品素材库：细节图和纹理完整">选择</button></article>
+            <article class="project-select-card" data-project-select-category="服装"><div class="project-select-thumb image"><img src="assets/product-cover-01.png" alt=""></div><div><h4>极简抽绳上衣</h4><p>版型、抽绳结构和正背面信息完整。</p></div><button class="btn" type="button" data-select-resource="product" data-resource-label="极简抽绳上衣" data-resource-meta="商品素材库：结构细节完整">选择</button></article>
+            <article class="project-select-card" data-project-select-category="配饰"><div class="project-select-thumb image"><img src="assets/product-cover-03.png" alt=""></div><div><h4>金属腰带扣</h4><p>主体轮廓已识别，适合做 Logo 和材质特写。</p></div><button class="btn" type="button" data-select-resource="product" data-resource-label="金属腰带扣" data-resource-meta="商品素材库：可用于配饰视频">选择</button></article>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="modal-backdrop" data-modal-panel="project-model-select">
-    <div class="modal modal-panel project-select-modal">
-      <div class="modal-head"><div><h3>选择模特图</h3><p>从已创建好的模特库中选择，系统使用五视图保持人物一致。</p></div><button class="modal-close" type="button">×</button></div>
-      <div class="modal-body">
-        <div class="project-select-filters">
-          <button class="pill-btn active" type="button" data-project-select-filter="all">全部</button>
-          <button class="pill-btn" type="button" data-project-select-filter="女性">女性</button>
-          <button class="pill-btn" type="button" data-project-select-filter="男性">男性</button>
-          <button class="pill-btn" type="button" data-project-select-filter="童装">童装</button>
-          <button class="pill-btn" type="button" data-project-select-filter="商务">商务</button>
-          <button class="pill-btn" type="button" data-project-select-filter="休闲">休闲</button>
-        </div>
-        <div class="project-select-list project-select-grid">
-          <article class="project-select-card" data-project-select-category="女性 亚洲 商务"><div class="project-select-thumb image"><img src="assets/model-detail-source.png" alt=""></div><div><h4>都市通勤女模特</h4><p>女性 / 亚洲 / 商务，适合服装、箱包和配饰短视频。</p></div><button class="btn primary" type="button" data-select-resource="model" data-resource-label="都市通勤女模特" data-resource-meta="模特库：五视图已生成">选择</button></article>
-          <article class="project-select-card" data-project-select-category="女性 休闲"><div class="project-select-thumb image"><img src="assets/model-cover-black-dress.png" alt=""></div><div><h4>清新休闲女模特</h4><p>女性 / 休闲，适合生活方式和街拍场景。</p></div><button class="btn" type="button" data-select-resource="model" data-resource-label="清新休闲女模特" data-resource-meta="模特库：适合休闲场景">选择</button></article>
-          <article class="project-select-card" data-project-select-category="男性 休闲"><div class="project-select-thumb image"><img src="assets/model-detail-source.png" alt=""></div><div><h4>户外休闲男模特</h4><p>男性 / 亚洲 / 休闲，适合鞋服和户外场景。</p></div><button class="btn" type="button" data-select-resource="model" data-resource-label="户外休闲男模特" data-resource-meta="模特库：适合户外休闲场景">选择</button></article>
-          <article class="project-select-card" data-project-select-category="男性 商务"><div class="project-select-thumb image"><img src="assets/model-cover-black-dress.png" alt=""></div><div><h4>商务西装男模特</h4><p>男性 / 商务，适合箱包和耐用品讲解。</p></div><button class="btn" type="button" data-select-resource="model" data-resource-label="商务西装男模特" data-resource-meta="模特库：适合商务讲解">选择</button></article>
-          <article class="project-select-card" data-project-select-category="童装 女性 休闲"><div class="project-select-thumb image"><img src="assets/model-detail-source.png" alt=""></div><div><h4>童装活力女童模特</h4><p>女童 / 休闲，适合童装、鞋帽和亲子用品。</p></div><button class="btn" type="button" data-select-resource="model" data-resource-label="童装活力女童模特" data-resource-meta="模特库：适合童装场景">选择</button></article>
-          <article class="project-select-card" data-project-select-category="女性 商务"><div class="project-select-thumb image"><img src="assets/model-cover-black-dress.png" alt=""></div><div><h4>欧美轻奢女模特</h4><p>女性 / 轻奢 / 商务，适合箱包和配饰。</p></div><button class="btn" type="button" data-select-resource="model" data-resource-label="欧美轻奢女模特" data-resource-meta="模特库：适合轻奢场景">选择</button></article>
+    <div class="project-select-modal-shell">
+      <button class="modal-close video-detail-close project-select-modal-close" type="button">×</button>
+      <div class="modal modal-panel project-select-modal">
+        <div class="modal-head"><div><h3>选择模特图</h3><p>从已创建好的模特库中选择，系统使用五视图保持人物一致。</p></div></div>
+        <div class="modal-body">
+          <div class="project-select-filters">
+            <button class="pill-btn active" type="button" data-project-select-filter="all">全部</button>
+            <button class="pill-btn" type="button" data-project-select-filter="女性">女性</button>
+            <button class="pill-btn" type="button" data-project-select-filter="男性">男性</button>
+            <button class="pill-btn" type="button" data-project-select-filter="童装">童装</button>
+            <button class="pill-btn" type="button" data-project-select-filter="商务">商务</button>
+            <button class="pill-btn" type="button" data-project-select-filter="休闲">休闲</button>
+          </div>
+          <div class="project-select-list project-select-grid">
+            <article class="project-select-card" data-project-select-category="女性 亚洲 商务"><div class="project-select-thumb image"><img src="assets/model-detail-source.png" alt=""></div><div><h4>都市通勤女模特</h4><p>女性 / 亚洲 / 商务，适合服装、箱包和配饰短视频。</p></div><button class="btn primary" type="button" data-select-resource="model" data-resource-label="都市通勤女模特" data-resource-meta="模特库：五视图已生成">选择</button></article>
+            <article class="project-select-card" data-project-select-category="女性 休闲"><div class="project-select-thumb image"><img src="assets/model-cover-black-dress.png" alt=""></div><div><h4>清新休闲女模特</h4><p>女性 / 休闲，适合生活方式和街拍场景。</p></div><button class="btn" type="button" data-select-resource="model" data-resource-label="清新休闲女模特" data-resource-meta="模特库：适合休闲场景">选择</button></article>
+            <article class="project-select-card" data-project-select-category="男性 休闲"><div class="project-select-thumb image"><img src="assets/model-detail-source.png" alt=""></div><div><h4>户外休闲男模特</h4><p>男性 / 亚洲 / 休闲，适合鞋服和户外场景。</p></div><button class="btn" type="button" data-select-resource="model" data-resource-label="户外休闲男模特" data-resource-meta="模特库：适合户外休闲场景">选择</button></article>
+            <article class="project-select-card" data-project-select-category="男性 商务"><div class="project-select-thumb image"><img src="assets/model-cover-black-dress.png" alt=""></div><div><h4>商务西装男模特</h4><p>男性 / 商务，适合箱包和耐用品讲解。</p></div><button class="btn" type="button" data-select-resource="model" data-resource-label="商务西装男模特" data-resource-meta="模特库：适合商务讲解">选择</button></article>
+            <article class="project-select-card" data-project-select-category="童装 女性 休闲"><div class="project-select-thumb image"><img src="assets/model-detail-source.png" alt=""></div><div><h4>童装活力女童模特</h4><p>女童 / 休闲，适合童装、鞋帽和亲子用品。</p></div><button class="btn" type="button" data-select-resource="model" data-resource-label="童装活力女童模特" data-resource-meta="模特库：适合童装场景">选择</button></article>
+            <article class="project-select-card" data-project-select-category="女性 商务"><div class="project-select-thumb image"><img src="assets/model-cover-black-dress.png" alt=""></div><div><h4>欧美轻奢女模特</h4><p>女性 / 轻奢 / 商务，适合箱包和配饰。</p></div><button class="btn" type="button" data-select-resource="model" data-resource-label="欧美轻奢女模特" data-resource-meta="模特库：适合轻奢场景">选择</button></article>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="modal-backdrop" data-modal-panel="project-voice-select">
-    <div class="modal modal-panel project-select-modal">
-      <div class="modal-head"><div><h3>选择音色</h3><p>从当前音色库选择音色，同一项目所有分镜使用同一音色。</p></div><button class="modal-close" type="button">×</button></div>
-      <div class="modal-body">
-        <div class="project-select-filters">
-          <button class="pill-btn active" type="button" data-project-select-filter="all">全部</button>
-          <button class="pill-btn" type="button" data-project-select-filter="女生">女生</button>
-          <button class="pill-btn" type="button" data-project-select-filter="男生">男生</button>
-          <button class="pill-btn" type="button" data-project-select-filter="童声">童声</button>
-          <button class="pill-btn" type="button" data-project-select-filter="方言">方言</button>
-          <button class="pill-btn" type="button" data-project-select-filter="情绪化">情绪化</button>
-        </div>
-        <div class="project-select-list project-select-grid">
-          <article class="project-select-card" data-project-select-category="女生 自然 轻快"><div class="project-select-thumb image"><img src="assets/voice-avatars/warm-female.png" alt=""></div><div><h4>清爽女声</h4><p>自然 / 轻快，适合夏季服装、鞋包和彩妆口播。</p></div><button class="btn primary" type="button" data-select-resource="voice" data-resource-label="清爽女声" data-resource-meta="音色库：自然轻快女声">选择</button></article>
-          <article class="project-select-card" data-project-select-category="男生 商务 稳重"><div class="project-select-thumb image"><img src="assets/voice-avatars/mature-male.png" alt=""></div><div><h4>成熟男声</h4><p>商务 / 稳重，适合耐用品和功能型商品讲解。</p></div><button class="btn" type="button" data-select-resource="voice" data-resource-label="成熟男声" data-resource-meta="音色库：商务稳重男声">选择</button></article>
-          <article class="project-select-card" data-project-select-category="女生 专业 亲和"><div class="project-select-thumb image"><img src="assets/voice-avatars/pro-female.png" alt=""></div><div><h4>专业女声</h4><p>专业 / 亲和，适合美妆、服饰和生活类口播。</p></div><button class="btn" type="button" data-select-resource="voice" data-resource-label="专业女声" data-resource-meta="音色库：专业亲和女声">选择</button></article>
-          <article class="project-select-card" data-project-select-category="童声 轻快"><div class="project-select-thumb image"><img src="assets/voice-avatars/young-male.png" alt=""></div><div><h4>清亮童声</h4><p>清亮 / 自然，适合童装和亲子用品讲解。</p></div><button class="btn" type="button" data-select-resource="voice" data-resource-label="清亮童声" data-resource-meta="音色库：清亮童声">选择</button></article>
-          <article class="project-select-card" data-project-select-category="方言 女生 亲切"><div class="project-select-thumb image"><img src="assets/voice-avatars/pro-female.png" alt=""></div><div><h4>方言女声</h4><p>方言 / 亲切，适合区域促销和本地生活。</p></div><button class="btn" type="button" data-select-resource="voice" data-resource-label="方言女声" data-resource-meta="音色库：亲切方言女声">选择</button></article>
-          <article class="project-select-card" data-project-select-category="情绪化 女生 温柔"><div class="project-select-thumb image"><img src="assets/voice-avatars/warm-female.png" alt=""></div><div><h4>情绪叙事</h4><p>温柔 / 叙事，适合剧情种草和氛围表达。</p></div><button class="btn" type="button" data-select-resource="voice" data-resource-label="情绪叙事" data-resource-meta="音色库：温柔情绪叙事">选择</button></article>
+    <div class="project-select-modal-shell">
+      <button class="modal-close video-detail-close project-select-modal-close" type="button">×</button>
+      <div class="modal modal-panel project-select-modal">
+        <div class="modal-head"><div><h3>选择音色</h3><p>从当前音色库选择音色，同一项目所有分镜使用同一音色。</p></div></div>
+        <div class="modal-body">
+          <div class="project-select-filters">
+            <button class="pill-btn active" type="button" data-project-select-filter="all">全部</button>
+            <button class="pill-btn" type="button" data-project-select-filter="女生">女生</button>
+            <button class="pill-btn" type="button" data-project-select-filter="男生">男生</button>
+            <button class="pill-btn" type="button" data-project-select-filter="童声">童声</button>
+            <button class="pill-btn" type="button" data-project-select-filter="方言">方言</button>
+            <button class="pill-btn" type="button" data-project-select-filter="情绪化">情绪化</button>
+          </div>
+          <div class="project-select-list project-select-grid">
+            <article class="project-select-card" data-project-select-category="女生 自然 轻快"><div class="project-select-thumb image"><img src="assets/voice-avatars/warm-female.png" alt=""></div><div><h4>清爽女声</h4><p>自然 / 轻快，适合夏季服装、鞋包和彩妆口播。</p></div><button class="btn primary" type="button" data-select-resource="voice" data-resource-label="清爽女声" data-resource-meta="音色库：自然轻快女声">选择</button></article>
+            <article class="project-select-card" data-project-select-category="男生 商务 稳重"><div class="project-select-thumb image"><img src="assets/voice-avatars/mature-male.png" alt=""></div><div><h4>成熟男声</h4><p>商务 / 稳重，适合耐用品和功能型商品讲解。</p></div><button class="btn" type="button" data-select-resource="voice" data-resource-label="成熟男声" data-resource-meta="音色库：商务稳重男声">选择</button></article>
+            <article class="project-select-card" data-project-select-category="女生 专业 亲和"><div class="project-select-thumb image"><img src="assets/voice-avatars/pro-female.png" alt=""></div><div><h4>专业女声</h4><p>专业 / 亲和，适合美妆、服饰和生活类口播。</p></div><button class="btn" type="button" data-select-resource="voice" data-resource-label="专业女声" data-resource-meta="音色库：专业亲和女声">选择</button></article>
+            <article class="project-select-card" data-project-select-category="童声 轻快"><div class="project-select-thumb image"><img src="assets/voice-avatars/young-male.png" alt=""></div><div><h4>清亮童声</h4><p>清亮 / 自然，适合童装和亲子用品讲解。</p></div><button class="btn" type="button" data-select-resource="voice" data-resource-label="清亮童声" data-resource-meta="音色库：清亮童声">选择</button></article>
+            <article class="project-select-card" data-project-select-category="方言 女生 亲切"><div class="project-select-thumb image"><img src="assets/voice-avatars/pro-female.png" alt=""></div><div><h4>方言女声</h4><p>方言 / 亲切，适合区域促销和本地生活。</p></div><button class="btn" type="button" data-select-resource="voice" data-resource-label="方言女声" data-resource-meta="音色库：亲切方言女声">选择</button></article>
+            <article class="project-select-card" data-project-select-category="情绪化 女生 温柔"><div class="project-select-thumb image"><img src="assets/voice-avatars/warm-female.png" alt=""></div><div><h4>情绪叙事</h4><p>温柔 / 叙事，适合剧情种草和氛围表达。</p></div><button class="btn" type="button" data-select-resource="voice" data-resource-label="情绪叙事" data-resource-meta="音色库：温柔情绪叙事">选择</button></article>
+          </div>
         </div>
       </div>
     </div>
@@ -612,6 +767,19 @@
         <div class="status-callout"><div><strong>提交后进入生成中</strong>系统会按输入参数、视频切片与视频生成、视频裂变三个阶段执行。</div></div>
       </div>
       <div class="modal-foot"><button class="btn" type="button" data-dismiss>取消</button><button class="btn primary" type="button" data-start-generate>确认生成</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop project-exit-backdrop" data-modal-panel="project-exit-confirm">
+    <div class="modal modal-panel project-exit-modal">
+      <div class="project-exit-body">
+        <h3>确认关闭当前项目编辑？</h3>
+        <p>项目进度会保留在“我的项目”中，可随时继续编辑。</p>
+        <div class="project-exit-actions">
+          <button class="btn" type="button" data-dismiss>取消</button>
+          <button class="btn primary" type="button" data-project-confirm-leave>确定</button>
+        </div>
+      </div>
     </div>
   </div>
 

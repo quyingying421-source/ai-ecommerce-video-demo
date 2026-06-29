@@ -332,6 +332,37 @@ const projectResourceMap = {
   voice: { label: "上传音色", prefix: "已选音色" }
 };
 
+const projectSelectedLabelMap = {
+  video: "[data-project-selected-video]",
+  product: "[data-project-selected-product]",
+  model: "[data-project-selected-model]",
+  voice: "[data-project-selected-voice]"
+};
+
+const PROJECT_FISSION_BEAN_COST = 3;
+
+function getProjectFissionCount() {
+  const value = Number(document.querySelector("[data-project-fission-count]")?.value || 5);
+  return Math.min(12, Math.max(1, value));
+}
+
+function setProjectFissionButtons(text, disabled) {
+  document.querySelectorAll("[data-project-fission]").forEach(button => {
+    if (typeof disabled === "boolean") button.disabled = disabled;
+    const label = button.querySelector("span");
+    if (label) label.textContent = text;
+  });
+}
+
+function syncProjectFissionCost(count = getProjectFissionCount()) {
+  document.querySelectorAll("[data-project-fission-count]").forEach(select => {
+    if (select.value !== String(count)) select.value = String(count);
+  });
+  document.querySelectorAll("[data-project-fission-cost]").forEach(item => {
+    item.textContent = String(count * PROJECT_FISSION_BEAN_COST);
+  });
+}
+
 function setBadgeState(el, state) {
   if (!el) return;
   el.classList.remove("info", "success", "warning", "danger", "gray");
@@ -349,6 +380,8 @@ function selectResource(type, label, meta) {
     resourceButton.classList.add("is-selected");
     resourceButton.title = label;
   }
+  const selectedLabel = document.querySelector(projectSelectedLabelMap[type]);
+  if (selectedLabel) selectedLabel.textContent = label;
   closeModals();
   const navButton = document.querySelector('button[data-page="project"]');
   show("project", navButton);
@@ -362,23 +395,202 @@ const projectGenerateSteps = [
 ];
 let projectGenerateTimer;
 
+const taskProjectDetailMap = {
+  "task-1": {
+    badge: ["生成中", "info"],
+    title: "夏季防晒衣穿搭口播生成",
+    desc: "保留任务记录中的生成进度、商品、模特和音色参数。",
+    status: "分镜生成中，已完成 3/5",
+    percent: 68,
+    flow: 2,
+    statusStep: 2,
+    generated: false,
+    cover: "assets/task-video-cover.png",
+    previewTitle: "夏季防晒衣穿搭口播",
+    previewMeta: "竖版 9:16 · 36 秒 · 720P",
+    selected: {
+      video: "夏季防晒衣穿搭口播",
+      product: "防晒衣",
+      model: "都市通勤女模特",
+      voice: "清爽女声"
+    },
+    metrics: ["3/5 分镜", "720P 输出", "AI 口播"],
+    fissionCount: "已生成 0 个"
+  },
+  "task-2": {
+    badge: ["已完成", "success"],
+    title: "补水面膜卖点口播成片",
+    desc: "保留任务记录中的成片结果、商品参数和音色配置。",
+    status: "成片已生成，可下载或裂变",
+    percent: 100,
+    flow: 2,
+    statusStep: 3,
+    generated: true,
+    cover: "assets/task-video-cover.png",
+    previewTitle: "补水面膜卖点口播成片",
+    previewMeta: "竖版 9:16 · 22 秒 · 720P",
+    selected: {
+      video: "补水面膜卖点口播",
+      product: "补水面膜",
+      model: "未使用",
+      voice: "促销播报"
+    },
+    metrics: ["已成片", "720P 输出", "可裂变"],
+    fissionCount: "已生成 1 个"
+  },
+  "task-3": {
+    badge: ["已完成", "success"],
+    title: "贵人鸟老爹鞋商品素材处理",
+    desc: "保留任务记录中的素材处理进度、商品参数和生成内容。",
+    status: "商品解析与多视角图已完成",
+    percent: 100,
+    flow: 2,
+    statusStep: 3,
+    generated: true,
+    cover: "assets/product-cover-01.png",
+    previewTitle: "老爹鞋多视角商品图",
+    previewMeta: "5 张原图 · 7 项卖点 · 多视角已生成",
+    selected: {
+      video: "商品素材处理",
+      product: "贵人鸟老爹鞋",
+      model: "正面 / 侧面 / 鞋底 / Logo",
+      voice: "可用于创作"
+    },
+    metrics: ["5 张图", "7 项卖点", "多视角"],
+    fissionCount: "已生成 0 个"
+  },
+  "task-4": {
+    badge: ["失败", "danger"],
+    title: "连衣裙大促短视频裂变任务",
+    desc: "保留任务记录中的失败阶段、裂变进度和已配置参数。",
+    status: "7/10 已完成，失败阶段：分镜 4",
+    percent: 70,
+    flow: 3,
+    statusStep: 2,
+    generated: false,
+    failed: true,
+    cover: "assets/task-video-cover.png",
+    previewTitle: "连衣裙大促视频裂变",
+    previewMeta: "竖版 9:16 · 10 条变体 · 分镜 4 失败",
+    selected: {
+      video: "连衣裙大促视频裂变",
+      product: "白色连衣裙",
+      model: "家居生活场景模特",
+      voice: "建议更换参考图"
+    },
+    metrics: ["7/10 完成", "3 条重试", "裂变任务"],
+    fissionCount: "已生成 7 个"
+  }
+};
+
+function updateTaskDetailFlow(data) {
+  document.querySelectorAll("[data-project-status-step]").forEach(item => {
+    item.classList.toggle("active", Number(item.dataset.projectStatusStep) === data.statusStep);
+  });
+
+  document.querySelectorAll("[data-project-flow-step]").forEach(item => {
+    const index = Number(item.dataset.projectFlowStep);
+    item.classList.toggle("active", index === data.flow);
+    item.classList.toggle("complete", index < data.flow || (data.generated && index === data.flow));
+  });
+
+  document.querySelectorAll(".project-flow-steps i").forEach((line, index) => {
+    line.classList.toggle("complete", index + 1 < data.flow || (data.generated && index + 1 === data.flow));
+  });
+}
+
+function openTaskProjectDetail(taskId, trigger) {
+  const data = taskProjectDetailMap[taskId];
+  const generatePage = document.querySelector("[data-project-generate-page]");
+  if (!data || !generatePage) return;
+
+  clearInterval(projectGenerateTimer);
+  closeModals();
+  const navButton = document.querySelector('button[data-page="project"]');
+  show("project", navButton);
+
+  generatePage.classList.remove("is-running", "is-generated", "is-fission", "is-task-failed");
+  generatePage.classList.add("is-active", data.generated ? "is-generated" : "is-running");
+  generatePage.classList.toggle("is-task-failed", Boolean(data.failed));
+
+  const headerBadge = generatePage.querySelector(".project-generate-title .badge");
+  const headerTitle = generatePage.querySelector(".project-generate-title strong");
+  const headerDesc = generatePage.querySelector(".project-generate-title p");
+  if (headerBadge) {
+    headerBadge.textContent = data.badge[0];
+    setBadgeState(headerBadge, data.badge[1]);
+  }
+  if (headerTitle) headerTitle.textContent = data.title;
+  if (headerDesc) headerDesc.textContent = data.desc;
+
+  const outputBadge = document.querySelector("[data-project-output-badge]");
+  const statusText = document.getElementById("projectCurrentStatus");
+  const percent = document.getElementById("projectProgressPercent");
+  const fill = document.getElementById("projectProgressFill");
+  const previewTitle = document.querySelector("[data-project-preview-title]");
+  const previewMeta = generatePage.querySelector(".project-preview-head p");
+  const previewImage = generatePage.querySelector(".project-generation-phone img");
+  const fissionButton = document.querySelector("[data-project-fission]");
+  const fissionCount = document.querySelector(".project-fission-workspace-head span");
+
+  if (outputBadge) outputBadge.textContent = data.badge[0];
+  if (statusText) statusText.textContent = data.status;
+  if (percent) percent.textContent = `${data.percent}%`;
+  if (fill) fill.style.width = `${data.percent}%`;
+  if (previewTitle) previewTitle.textContent = data.previewTitle;
+  if (previewMeta) previewMeta.textContent = data.previewMeta;
+  if (previewImage) previewImage.src = data.cover;
+  if (fissionButton) {
+    setProjectFissionButtons("一键裂变", !data.generated);
+  }
+  if (fissionCount) fissionCount.textContent = data.fissionCount;
+
+  Object.entries(data.selected).forEach(([type, label]) => {
+    const target = document.querySelector(projectSelectedLabelMap[type]);
+    if (target) target.textContent = label;
+  });
+
+  document.querySelectorAll(".project-preview-metrics span").forEach((item, index) => {
+    if (!data.metrics[index]) return;
+    const parts = data.metrics[index].split(" ");
+    item.innerHTML = parts.length > 1 ? `<b>${parts[0]}</b> ${parts.slice(1).join(" ")}` : `<b>${data.metrics[index]}</b>`;
+  });
+
+  document.querySelectorAll(".project-fission-result-grid div").forEach((card, index) => {
+    const shouldMarkDone = data.generated || (data.failed && index < 7);
+    card.classList.toggle("done", shouldMarkDone);
+    const label = card.querySelector("span");
+    if (label) label.textContent = shouldMarkDone ? "已生成" : "待生成";
+  });
+
+  updateTaskDetailFlow(data);
+
+  if (trigger) {
+    document.querySelectorAll("#taskList [data-task]").forEach(card => {
+      card.classList.toggle("active", card.dataset.task === taskId);
+    });
+  }
+}
+
 function updateProjectGenerateState(stepIndex) {
   const step = projectGenerateSteps[Math.min(stepIndex, projectGenerateSteps.length - 1)];
   const percent = document.getElementById("projectProgressPercent");
   const fill = document.getElementById("projectProgressFill");
   const statusText = document.getElementById("projectCurrentStatus");
-  const outputPanel = document.querySelector(".project-output-panel");
+  const outputPanel = document.querySelector("[data-project-generate-page]");
   const outputBadge = document.querySelector("[data-project-output-badge]");
   const fissionButton = document.querySelector("[data-project-fission]");
+  const previewTitle = document.querySelector("[data-project-preview-title]");
   if (percent) percent.textContent = `${step.percent}%`;
   if (fill) fill.style.width = `${step.percent}%`;
   if (statusText) statusText.textContent = step.text;
   if (outputBadge) outputBadge.textContent = step.badge || "生成中";
+  if (previewTitle) previewTitle.textContent = step.generated ? "最终合成视频" : "正在生成";
   if (outputPanel) {
     outputPanel.classList.toggle("is-generated", Boolean(step.generated));
     outputPanel.classList.toggle("is-running", !step.generated);
   }
-  if (fissionButton) fissionButton.disabled = !step.generated;
+  if (fissionButton) setProjectFissionButtons("一键裂变", !step.generated);
 
   document.querySelectorAll("[data-project-status-step]").forEach(item => {
     item.classList.toggle("active", Number(item.dataset.projectStatusStep) === step.status);
@@ -406,10 +618,10 @@ function updateProjectGenerateState(stepIndex) {
 }
 
 function startProjectFission() {
-  const outputPanel = document.querySelector(".project-output-panel");
+  const outputPanel = document.querySelector("[data-project-generate-page]");
   const outputBadge = document.querySelector("[data-project-output-badge]");
   const statusText = document.getElementById("projectCurrentStatus");
-  const fissionButton = document.querySelector("[data-project-fission]");
+  const fissionCountValue = getProjectFissionCount();
   if (!outputPanel?.classList.contains("is-generated")) {
     showToast("请先生成成片");
     return;
@@ -417,11 +629,8 @@ function startProjectFission() {
 
   outputPanel.classList.add("is-fission");
   if (outputBadge) outputBadge.textContent = "裂变中";
-  if (statusText) statusText.textContent = "正在生成 5 个场景裂变视频";
-  if (fissionButton) {
-    fissionButton.disabled = true;
-    fissionButton.textContent = "裂变中";
-  }
+  if (statusText) statusText.textContent = `正在生成 ${fissionCountValue} 个场景裂变视频`;
+  setProjectFissionButtons("裂变中", true);
 
   document.querySelectorAll("[data-project-flow-step]").forEach(item => {
     const index = Number(item.dataset.projectFlowStep);
@@ -432,27 +641,37 @@ function startProjectFission() {
 
   setTimeout(() => {
     if (outputBadge) outputBadge.textContent = "裂变完成";
-    if (statusText) statusText.textContent = "已生成 5 个场景裂变视频";
-    if (fissionButton) {
-      fissionButton.disabled = false;
-      fissionButton.textContent = "再裂变 5 个";
-    }
-    showToast("已生成 5 个裂变视频");
+    if (statusText) statusText.textContent = `已生成 ${fissionCountValue} 个场景裂变视频`;
+    const fissionCount = document.querySelector(".project-fission-workspace-head span");
+    if (fissionCount) fissionCount.textContent = `已生成 ${fissionCountValue} 个`;
+    document.querySelectorAll(".project-fission-result-grid div").forEach((card, index) => {
+      card.classList.toggle("done", index < fissionCountValue);
+      const label = card.querySelector("span");
+      if (label) label.textContent = index < fissionCountValue ? "已生成" : "待选择";
+    });
+    setProjectFissionButtons(`再裂变 ${fissionCountValue} 个`, false);
+    showToast(`已生成 ${fissionCountValue} 个裂变视频`);
   }, 900);
 }
 
 function startProjectGenerate() {
   closeModals();
-  show("project", document.querySelector('button[data-page="project"]'));
+  const generatePage = document.querySelector("[data-project-generate-page]");
+  if (generatePage) generatePage.classList.add("is-active");
   showToast("生成任务已提交");
   clearInterval(projectGenerateTimer);
-  const outputPanel = document.querySelector(".project-output-panel");
+  const outputPanel = document.querySelector("[data-project-generate-page]");
   const fissionButton = document.querySelector("[data-project-fission]");
-  if (outputPanel) outputPanel.classList.remove("is-generated", "is-fission", "is-running");
-  if (fissionButton) {
-    fissionButton.disabled = true;
-    fissionButton.textContent = "裂变 5 个";
-  }
+  if (outputPanel) outputPanel.classList.remove("is-generated", "is-fission", "is-running", "is-task-failed");
+  const fissionCount = document.querySelector(".project-fission-workspace-head span");
+  if (fissionCount) fissionCount.textContent = "已生成 0 个";
+  document.querySelectorAll(".project-fission-result-grid div").forEach(card => {
+    card.classList.remove("done");
+    const label = card.querySelector("span");
+    if (label) label.textContent = "待生成";
+  });
+  if (fissionButton) setProjectFissionButtons("一键裂变", true);
+  syncProjectFissionCost();
   let stepIndex = 0;
   updateProjectGenerateState(stepIndex);
   projectGenerateTimer = setInterval(() => {
@@ -660,10 +879,56 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const taskProjectDetail = event.target.closest("[data-task-project-detail]");
+  if (taskProjectDetail) {
+    event.preventDefault();
+    event.stopPropagation();
+    openTaskProjectDetail(taskProjectDetail.dataset.taskProjectDetail, taskProjectDetail);
+    return;
+  }
+
   const projectFission = event.target.closest("[data-project-fission]");
   if (projectFission) {
     event.preventDefault();
     startProjectFission();
+    return;
+  }
+
+  const projectGenerateBack = event.target.closest("[data-project-generate-back]");
+  if (projectGenerateBack) {
+    event.preventDefault();
+    openModal("project-exit-confirm");
+    return;
+  }
+
+  const projectConfirmLeave = event.target.closest("[data-project-confirm-leave]");
+  if (projectConfirmLeave) {
+    event.preventDefault();
+    clearInterval(projectGenerateTimer);
+    document.querySelector("[data-project-generate-page]")?.classList.remove("is-active", "is-running", "is-generated", "is-fission");
+    closeModals();
+    return;
+  }
+
+  const projectBackToVideo = event.target.closest("[data-project-back-to-video]");
+  if (projectBackToVideo) {
+    event.preventDefault();
+    document.querySelector("[data-project-generate-page]")?.classList.remove("is-fission");
+    return;
+  }
+
+  const projectVideoTab = event.target.closest("[data-project-video-tab]");
+  if (projectVideoTab) {
+    event.preventDefault();
+    const board = projectVideoTab.closest(".project-video-board");
+    const target = projectVideoTab.dataset.projectVideoTab;
+    if (!board) return;
+    board.querySelectorAll("[data-project-video-tab]").forEach(button => {
+      button.classList.toggle("active", button === projectVideoTab);
+    });
+    board.querySelectorAll("[data-project-video-panel]").forEach(panel => {
+      panel.classList.toggle("active", panel.dataset.projectVideoPanel === target);
+    });
     return;
   }
 
@@ -672,6 +937,21 @@ document.addEventListener("click", event => {
     event.preventDefault();
     projectOption.parentElement.querySelectorAll("button").forEach(button => {
       button.classList.toggle("active", button === projectOption);
+    });
+    return;
+  }
+
+  const projectRefTab = event.target.closest("[data-project-ref-tab]");
+  if (projectRefTab) {
+    event.preventDefault();
+    const modal = projectRefTab.closest(".project-select-modal");
+    const mode = projectRefTab.dataset.projectRefTab;
+    if (!modal) return;
+    modal.querySelectorAll("[data-project-ref-tab]").forEach(button => {
+      button.classList.toggle("active", button === projectRefTab);
+    });
+    modal.querySelectorAll("[data-project-ref-panel]").forEach(panel => {
+      panel.classList.toggle("active", panel.dataset.projectRefPanel === mode);
     });
     return;
   }
@@ -936,6 +1216,12 @@ window.addEventListener("scroll", () => {
 loadMorePlazaVideos();
 
 document.addEventListener("change", event => {
+  const projectFissionCount = event.target.closest("[data-project-fission-count]");
+  if (projectFissionCount) {
+    syncProjectFissionCost(Number(projectFissionCount.value));
+    return;
+  }
+
   const voiceAudioInput = event.target.closest("[data-voice-audio-input]");
   if (voiceAudioInput) renderVoiceAudioFile(voiceAudioInput);
 });
