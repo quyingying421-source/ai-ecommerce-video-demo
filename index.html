@@ -22,7 +22,7 @@
       <nav class="nav" id="nav">
         <button class="nav-group expanded" type="button"><span class="nav-icon"></span>管理中心<span class="nav-arrow"></span></button>
         <button class="nav-leaf" data-page="project" type="button"><span class="nav-icon"></span>创建项目</button>
-        <button class="nav-leaf active" data-page="plaza" type="button"><span class="nav-icon"></span>视频广场</button>
+        <button class="nav-leaf active" data-page="plaza" type="button" hidden><span class="nav-icon"></span>视频广场</button>
         <button class="nav-leaf" data-page="materials" type="button"><span class="nav-icon"></span>商品素材库</button>
         <button class="nav-leaf" data-page="models" type="button"><span class="nav-icon"></span>模特库</button>
         <button class="nav-leaf" data-page="voices" type="button"><span class="nav-icon"></span>音色库</button>
@@ -83,8 +83,63 @@
                     <button class="pill-btn project-attach-btn" type="button" data-modal="project-model-select" data-project-resource="model"><span class="project-attach-icon model"></span>上传模特</button>
                     <button class="pill-btn project-attach-btn" type="button" data-modal="project-voice-select" data-project-resource="voice"><span class="project-attach-icon voice"></span>上传音色</button>
                   </div>
-                  <div class="project-param-summary" aria-label="参数设置">
-                    <span>16:9</span><i></i><span>720p</span><i></i><span>背景音乐</span><i></i><span>人声</span>
+                  <div class="project-param-popover-wrap" data-project-param-wrap>
+                    <button class="project-param-summary" type="button" aria-label="参数设置" data-project-param-trigger>
+                      <span data-project-param-summary-ratio>3:4</span><i></i><span data-project-param-summary-resolution>720p</span><i></i><span data-project-param-summary-music>背景音乐</span><i></i><span data-project-param-summary-voice>人声</span>
+                    </button>
+                    <div class="project-param-popover" data-project-param-popover>
+                      <div class="project-param-popover-title">参数设置</div>
+                      <div class="project-param-field">
+                        <div class="project-param-label">视频比例</div>
+                        <div class="project-param-choice-grid ratio">
+                          <button class="active" type="button" data-project-param-option="ratio" data-value="3:4">3:4</button>
+                          <button type="button" data-project-param-option="ratio" data-value="4:3">4:3</button>
+                          <button type="button" data-project-param-option="ratio" data-value="9:16">9:16</button>
+                          <button type="button" data-project-param-option="ratio" data-value="16:9">16:9</button>
+                          <button type="button" data-project-param-option="ratio" data-value="21:9">21:9</button>
+                        </div>
+                      </div>
+                      <div class="project-param-field">
+                        <div class="project-param-label">分辨率</div>
+                        <div class="project-param-choice-grid resolution">
+                          <button class="active" type="button" data-project-param-option="resolution" data-value="720p">720p（推荐）</button>
+                          <button type="button" data-project-param-option="resolution" data-value="1080p">1080p</button>
+                        </div>
+                      </div>
+                      <div class="project-param-field">
+                        <div class="project-param-label">视频时长</div>
+                        <div class="project-param-choice-grid duration-mode">
+                          <button class="active" type="button" data-project-param-option="durationMode" data-value="auto">智能匹配</button>
+                          <button type="button" data-project-param-option="durationMode" data-value="custom">自定义</button>
+                        </div>
+                        <div class="project-param-duration-control" data-project-duration-control>
+                          <input type="range" min="4" max="45" value="15" data-project-duration-range>
+                          <label>
+                            <input type="number" min="4" max="45" value="15" data-project-duration-input>
+                            <span>秒</span>
+                          </label>
+                          <small>可选 4-45 秒</small>
+                        </div>
+                      </div>
+                      <div class="project-param-toggle-row">
+                        <div><strong>生成背景音频</strong><span>自动生成与画面匹配的背景音乐</span></div>
+                        <div class="project-param-radio-group">
+                          <button class="active" type="button" data-project-param-option="music" data-value="on">开启</button>
+                          <button type="button" data-project-param-option="music" data-value="off">不开启</button>
+                        </div>
+                      </div>
+                      <div class="project-param-toggle-row">
+                        <div><strong>生成人声</strong><span>自动生成与画面匹配的人声</span></div>
+                        <div class="project-param-radio-group">
+                          <button class="active" type="button" data-project-param-option="voice" data-value="on">开启</button>
+                          <button type="button" data-project-param-option="voice" data-value="off">不开启</button>
+                        </div>
+                      </div>
+                      <div class="project-param-actions">
+                        <button class="btn" type="button" data-project-param-cancel>取消</button>
+                        <button class="btn primary" type="button" data-project-param-confirm>确认</button>
+                      </div>
+                    </div>
                   </div>
                   <button class="btn primary project-generate-btn" type="button" data-start-generate><span class="project-generate-icon"></span>生成 <em>3</em></button>
                 </div>
@@ -108,6 +163,7 @@
                   <button class="pill-btn" type="button"><span class="plaza-icon bag"></span>箱包</button>
                   <button class="pill-btn" type="button"><span class="plaza-icon beauty"></span>配饰</button>
                   <button class="pill-btn" type="button"><span class="plaza-icon hat"></span>帽子</button>
+                  <button class="pill-btn" type="button"><span class="plaza-icon beauty"></span>美妆</button>
                   <div class="square-search">搜索参考视频 / 商品类目 / 标签</div>
                 </div>
                 <div class="project-video-list">
@@ -160,6 +216,7 @@
           <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="内衣"><span class="task-tab-icon inner"></span>内衣</button>
           <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="箱包"><span class="task-tab-icon bag"></span>箱包</button>
           <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="配饰"><span class="task-tab-icon belt"></span>配饰</button>
+          <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="美妆">美妆</button>
           <button class="pill-btn" type="button" data-asset-filter="product" data-filter-value="其他">其他</button>
           <div class="square-search">搜索商品素材</div>
         </div>
@@ -287,10 +344,10 @@
           <button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="女生">女生</button>
           <button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="男生">男生</button>
           <button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="童声">童声</button>
-          <button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="方言">方言</button>
           <button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="情绪化">情绪化</button>
           <div class="square-search">搜索音色名称 / 风格 / 标签</div>
         </div>
+        <div class="voice-ai-tag-filter"><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="自然">自然</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="轻快">轻快</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="商务">商务</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="专业">专业</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="亲和">亲和</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="亲切">亲切</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="可爱">可爱</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="甜美">甜美</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="温柔">温柔</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="活力">活力</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="清亮">清亮</button><button class="pill-btn" type="button" data-asset-filter="voice" data-filter-value="热情">热情</button></div>
         <div class="voice-grid">
           <article class="voice-card" data-asset-card data-asset-type="voice" data-category="女生 自然 轻快"><div class="voice-identity"><img class="voice-avatar" src="assets/voice-avatars/warm-female.png" alt=""><div class="voice-main"><div class="voice-title-line"><h3>清爽女声</h3><span class="badge success">可用</span></div><div class="voice-tags"><span class="voice-tag type-female">女生</span><span class="voice-tag">自然</span><span class="voice-tag">轻快</span></div></div></div><p class="voice-card-desc">适合夏季服装、护肤和彩妆口播。</p><button class="voice-play" type="button"><span>播放</span></button><button class="voice-edit" type="button" data-modal="voice-upload">编辑</button></article>
           <article class="voice-card" data-asset-card data-asset-type="voice" data-category="男生 商务 稳重"><div class="voice-identity"><img class="voice-avatar" src="assets/voice-avatars/mature-male.png" alt=""><div class="voice-main"><div class="voice-title-line"><h3>成熟男声</h3><span class="badge success">可用</span></div><div class="voice-tags"><span class="voice-tag type-male">男生</span><span class="voice-tag">商务</span><span class="voice-tag">稳重</span></div></div></div><p class="voice-card-desc">适合家电、运动鞋和耐用品讲解。</p><button class="voice-play" type="button"><span>播放</span></button><button class="voice-edit" type="button" data-modal="voice-upload">编辑</button></article>
@@ -460,7 +517,14 @@
       <button class="btn" type="button" data-project-generate-back>返回</button>
       <div class="project-generate-title">
         <span class="badge info">视频生成</span>
-        <div><strong>项目-2026/6/29 15:30:00</strong><p>参考视频解析、商品匹配、成片合成与裂变结果集中展示</p></div>
+        <div class="project-title-copy">
+          <div class="project-title-edit-row">
+            <button class="project-title-edit-btn" type="button" aria-label="编辑项目名称" data-project-title-edit></button>
+            <strong data-project-title-text>项目-2026/6/29 15:30:00</strong>
+            <input class="project-title-input" type="text" value="项目-2026/6/29 15:30:00" data-project-title-input hidden>
+          </div>
+          <p>参考视频解析、商品匹配、成片合成与裂变结果集中展示</p>
+        </div>
       </div>
       <div class="project-generate-head-actions">
         <span class="pill-btn">自动保存</span>
@@ -857,7 +921,7 @@
         </div>
         <div class="modal-body product-create-body">
           <section class="product-step-panel active" data-product-step-panel="1">
-            <div class="product-category-panel"><label>商品类别 <em>*</em></label><div class="pill-row product-category-row"><button class="pill-btn active" type="button" data-upload-category="服装">服装</button><button class="pill-btn" type="button" data-upload-category="鞋子">鞋子</button><button class="pill-btn" type="button" data-upload-category="内衣">内衣</button><button class="pill-btn" type="button" data-upload-category="箱包">箱包</button><button class="pill-btn" type="button" data-upload-category="配饰">配饰</button><button class="pill-btn" type="button" data-upload-category="帽子">帽子</button><button class="pill-btn" type="button" data-upload-category="其他">其他</button></div></div>
+            <div class="product-category-panel"><label>商品类别 <em>*</em></label><div class="pill-row product-category-row"><button class="pill-btn active" type="button" data-upload-category="服装">服装</button><button class="pill-btn" type="button" data-upload-category="鞋子">鞋子</button><button class="pill-btn" type="button" data-upload-category="内衣">内衣</button><button class="pill-btn" type="button" data-upload-category="箱包">箱包</button><button class="pill-btn" type="button" data-upload-category="配饰">配饰</button><button class="pill-btn" type="button" data-upload-category="帽子">帽子</button><button class="pill-btn" type="button" data-upload-category="美妆">美妆</button><button class="pill-btn" type="button" data-upload-category="其他">其他</button><button class="pill-btn" type="button" data-upload-custom-category>自定义</button></div></div>
             <label class="form-field product-name-field"><span>商品名称 <em>*</em></span><input class="form-control" maxlength="20" value="白色运动休闲鞋" data-product-name-input><small><b data-product-name-count>7</b>/20</small></label>
             <div class="product-upload-tip"><span>i</span><p>不同类别的商品对上传图片有不同要求，请先选择类别，系统会自动展示建议补充的商品视角。</p></div>
           </section>
@@ -887,7 +951,7 @@
                 </div>
               </div>
               <div class="product-result-form">
-                <label class="form-field"><span>商品类别</span><select class="form-control"><option>服装</option><option>鞋子</option><option>内衣</option><option>箱包</option><option>配饰</option><option>帽子</option><option>其他</option></select></label>
+                <label class="form-field"><span>商品类别</span><select class="form-control"><option>服装</option><option>鞋子</option><option>内衣</option><option>箱包</option><option>配饰</option><option>帽子</option><option>美妆</option><option>其他</option></select></label>
                 <label class="form-field"><span>商品名称</span><input class="form-control" value="白色运动休闲鞋"></label>
                 <label class="form-field"><span>商品元素说明</span><textarea class="form-control">采用优质面料制作，颜色搭配协调，版型修身，细节处理精致，质感出众。</textarea></label>
                 <label class="form-field"><span>卖点</span><textarea class="form-control">优质面料舒适透气&#10;版型修身显瘦&#10;细节精致品质保证</textarea></label>

@@ -340,10 +340,100 @@ const projectSelectedLabelMap = {
 };
 
 const PROJECT_FISSION_BEAN_COST = 3;
+const projectParamState = {
+  ratio: "3:4",
+  resolution: "720p",
+  durationMode: "auto",
+  duration: "15",
+  music: "on",
+  voice: "on"
+};
+let projectParamDraft = { ...projectParamState };
+
+function normalizeProjectDuration(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "15";
+  return String(Math.min(45, Math.max(4, Math.round(number))));
+}
 
 function getProjectFissionCount() {
   const value = Number(document.querySelector("[data-project-fission-count]")?.value || 5);
   return Math.min(12, Math.max(1, value));
+}
+
+function updateProjectParamSummary() {
+  const ratio = document.querySelector("[data-project-param-summary-ratio]");
+  const resolution = document.querySelector("[data-project-param-summary-resolution]");
+  const music = document.querySelector("[data-project-param-summary-music]");
+  const voice = document.querySelector("[data-project-param-summary-voice]");
+  if (ratio) ratio.textContent = projectParamState.ratio;
+  if (resolution) resolution.textContent = projectParamState.resolution;
+  if (music) music.textContent = projectParamState.music === "on" ? "背景音乐" : "无背景音乐";
+  if (voice) voice.textContent = projectParamState.voice === "on" ? "人声" : "无人声";
+}
+
+function renderProjectParamOptions() {
+  document.querySelectorAll("[data-project-param-option]").forEach(button => {
+    const key = button.dataset.projectParamOption;
+    button.classList.toggle("active", projectParamDraft[key] === button.dataset.value);
+  });
+  const durationControl = document.querySelector("[data-project-duration-control]");
+  durationControl?.classList.toggle("is-disabled", projectParamDraft.durationMode !== "custom");
+  document.querySelectorAll("[data-project-duration-range], [data-project-duration-input]").forEach(input => {
+    input.value = projectParamDraft.duration;
+  });
+}
+
+function openProjectParamPopover() {
+  const wrap = document.querySelector("[data-project-param-wrap]");
+  if (!wrap) return;
+  projectParamDraft = { ...projectParamState };
+  renderProjectParamOptions();
+  wrap.classList.add("is-open");
+}
+
+function closeProjectParamPopover() {
+  document.querySelector("[data-project-param-wrap]")?.classList.remove("is-open");
+}
+
+function confirmProjectParamPopover() {
+  Object.assign(projectParamState, projectParamDraft);
+  updateProjectParamSummary();
+  closeProjectParamPopover();
+}
+
+function startProjectTitleEdit() {
+  const titleWrap = document.querySelector(".project-generate-title");
+  const titleText = document.querySelector("[data-project-title-text]");
+  const titleInput = document.querySelector("[data-project-title-input]");
+  if (!titleWrap || !titleText || !titleInput) return;
+  titleInput.value = titleText.textContent.trim();
+  titleInput.hidden = false;
+  titleWrap.classList.add("is-editing");
+  titleInput.focus();
+  titleInput.select();
+}
+
+function saveProjectTitleEdit() {
+  const titleWrap = document.querySelector(".project-generate-title");
+  const titleText = document.querySelector("[data-project-title-text]");
+  const titleInput = document.querySelector("[data-project-title-input]");
+  if (!titleWrap || !titleText || !titleInput) return;
+  const nextTitle = titleInput.value.trim() || titleText.textContent.trim();
+  titleText.textContent = nextTitle;
+  titleInput.value = nextTitle;
+  titleInput.hidden = true;
+  titleWrap.classList.remove("is-editing");
+}
+
+function cancelProjectTitleEdit() {
+  const titleWrap = document.querySelector(".project-generate-title");
+  const titleText = document.querySelector("[data-project-title-text]");
+  const titleInput = document.querySelector("[data-project-title-input]");
+  if (!titleWrap || !titleText || !titleInput) return;
+  titleInput.value = titleText.textContent.trim();
+  titleInput.hidden = true;
+  titleWrap.classList.remove("is-editing");
 }
 
 function setProjectFissionButtons(text, disabled) {
@@ -514,13 +604,15 @@ function openTaskProjectDetail(taskId, trigger) {
   generatePage.classList.toggle("is-task-failed", Boolean(data.failed));
 
   const headerBadge = generatePage.querySelector(".project-generate-title .badge");
-  const headerTitle = generatePage.querySelector(".project-generate-title strong");
+  const headerTitle = generatePage.querySelector("[data-project-title-text]");
+  const headerTitleInput = generatePage.querySelector("[data-project-title-input]");
   const headerDesc = generatePage.querySelector(".project-generate-title p");
   if (headerBadge) {
     headerBadge.textContent = data.badge[0];
     setBadgeState(headerBadge, data.badge[1]);
   }
   if (headerTitle) headerTitle.textContent = data.title;
+  if (headerTitleInput) headerTitleInput.value = data.title;
   if (headerDesc) headerDesc.textContent = data.desc;
 
   const outputBadge = document.querySelector("[data-project-output-badge]");
@@ -721,9 +813,13 @@ const uploadSlotRules = {
     summary: "帽子建议补齐帽型、佩戴效果和刺绣材质细节。",
     slots: [["正面图", "必传"], ["侧面图", "必传"], ["佩戴效果", "建议上传"], ["刺绣 / 材质", "建议上传"]]
   },
+  "美妆": {
+    summary: "美妆建议补齐产品正面、外包装和关键质地细节。",
+    slots: [["正面图", "必传"], ["包装图", "必传"], ["质地 / 色号", "建议上传"], ["Logo / 标签", "建议上传"]]
+  },
   "其他": {
-    summary: "其他品类可先上传主图、结构图和关键细节，AI 解析后再补充。",
-    slots: [["主图", "必传"], ["背面 / 侧面", "建议上传"], ["包装图", "建议上传"], ["关键细节", "建议上传"]]
+    summary: "其他品类先上传正面图和背景图，也可以自主添加补充图片。",
+    slots: [["正面图", "必传"], ["背景图", "必传"], ["自主添加图片", "建议上传"]]
   }
 };
 
@@ -771,7 +867,7 @@ function hydrateProductDetail(card) {
 function updateUploadSlots(category, root = document) {
   const slots = root.querySelector("[data-product-upload-slots]") || document.getElementById("productUploadSlots");
   if (!slots) return;
-  const rule = uploadSlotRules[category] || uploadSlotRules["服装"];
+  const rule = uploadSlotRules[category] || uploadSlotRules["其他"];
   const summary = root.querySelector("[data-upload-slot-summary]");
   if (summary) summary.textContent = rule.summary;
   slots.replaceChildren();
@@ -779,12 +875,62 @@ function updateUploadSlots(category, root = document) {
     const slot = document.createElement("div");
     const body = document.createElement("div");
     const strong = document.createElement("strong");
+    const state = document.createElement("span");
     slot.className = desc === "必传" ? "upload-slot required" : "upload-slot";
     strong.textContent = title;
-    body.append(strong, desc);
+    state.className = desc === "必传" ? "upload-slot-state required" : "upload-slot-state";
+    state.textContent = desc;
+    body.append(strong, state);
     slot.appendChild(body);
     slots.appendChild(slot);
   });
+}
+
+function createCustomUploadCategory(input) {
+  const category = input.value.trim();
+  const row = input.closest(".product-category-row");
+  const modal = input.closest(".modal") || document;
+  if (!row) return;
+  if (!category) {
+    input.replaceWith(createCustomUploadTrigger());
+    return;
+  }
+
+  const existing = Array.from(row.querySelectorAll("[data-upload-category]")).find(item => item.dataset.uploadCategory === category);
+  const customTrigger = row.querySelector("[data-upload-custom-category]");
+  const target = existing || document.createElement("button");
+  if (!existing) {
+    target.className = "pill-btn";
+    target.type = "button";
+    target.dataset.uploadCategory = category;
+    target.dataset.customUploadCategory = "true";
+    target.textContent = category;
+    row.insertBefore(target, input);
+  }
+
+  row.querySelectorAll("[data-upload-category]").forEach(item => item.classList.toggle("active", item === target));
+  input.replaceWith(customTrigger || createCustomUploadTrigger());
+  updateUploadSlots(category, modal);
+  if (modal.classList?.contains("product-create-modal")) syncProductResult(modal);
+}
+
+function createCustomUploadTrigger() {
+  const button = document.createElement("button");
+  button.className = "pill-btn";
+  button.type = "button";
+  button.dataset.uploadCustomCategory = "";
+  button.textContent = "自定义";
+  return button;
+}
+
+function showCustomUploadCategoryInput(trigger) {
+  const input = document.createElement("input");
+  input.className = "product-custom-category-input";
+  input.type = "text";
+  input.placeholder = "输入品类";
+  input.maxLength = 12;
+  trigger.replaceWith(input);
+  input.focus();
 }
 
 function getProductUploadModal() {
@@ -802,7 +948,11 @@ function syncProductResult(panel) {
   const name = panel.querySelector("[data-product-name-input]")?.value?.trim() || "白色运动休闲鞋";
   const resultSelect = panel.querySelector('.product-result-form select.form-control');
   const resultName = panel.querySelector('.product-result-form input.form-control');
-  if (resultSelect) resultSelect.value = activeCategory;
+  if (resultSelect) {
+    const hasOption = Array.from(resultSelect.options).some(option => option.value === activeCategory);
+    if (!hasOption) resultSelect.appendChild(new Option(activeCategory, activeCategory));
+    resultSelect.value = activeCategory;
+  }
   if (resultName) resultName.value = name;
 }
 
@@ -831,6 +981,7 @@ function resetProductUploadModal() {
   clearTimeout(productUploadTimer);
   const panel = getProductUploadModal();
   if (!panel) return;
+  panel.querySelector(".product-custom-category-input")?.replaceWith(createCustomUploadTrigger());
   const activeCategory = panel.querySelector("[data-upload-category].active")?.dataset.uploadCategory || "服装";
   updateUploadSlots(activeCategory, panel);
   syncProductNameCount(panel);
@@ -869,6 +1020,55 @@ document.addEventListener("click", event => {
     event.preventDefault();
     event.stopPropagation();
     selectResource(selectTrigger.dataset.selectResource, selectTrigger.dataset.resourceLabel, selectTrigger.dataset.resourceMeta);
+    return;
+  }
+
+  const projectParamTrigger = event.target.closest("[data-project-param-trigger]");
+  if (projectParamTrigger) {
+    event.preventDefault();
+    event.stopPropagation();
+    const wrap = projectParamTrigger.closest("[data-project-param-wrap]");
+    if (wrap?.classList.contains("is-open")) {
+      closeProjectParamPopover();
+    } else {
+      openProjectParamPopover();
+    }
+    return;
+  }
+
+  const projectParamOption = event.target.closest("[data-project-param-option]");
+  if (projectParamOption) {
+    event.preventDefault();
+    const key = projectParamOption.dataset.projectParamOption;
+    if (key) {
+      projectParamDraft[key] = projectParamOption.dataset.value;
+      renderProjectParamOptions();
+    }
+    return;
+  }
+
+  const projectParamCancel = event.target.closest("[data-project-param-cancel]");
+  if (projectParamCancel) {
+    event.preventDefault();
+    projectParamDraft = { ...projectParamState };
+    closeProjectParamPopover();
+    return;
+  }
+
+  const projectParamConfirm = event.target.closest("[data-project-param-confirm]");
+  if (projectParamConfirm) {
+    event.preventDefault();
+    confirmProjectParamPopover();
+    return;
+  }
+
+  const openProjectParam = document.querySelector("[data-project-param-wrap].is-open");
+  if (openProjectParam && !event.target.closest("[data-project-param-wrap]")) closeProjectParamPopover();
+
+  const projectTitleEdit = event.target.closest("[data-project-title-edit]");
+  if (projectTitleEdit) {
+    event.preventDefault();
+    startProjectTitleEdit();
     return;
   }
 
@@ -1114,6 +1314,13 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const customUploadCategory = event.target.closest("[data-upload-custom-category]");
+  if (customUploadCategory) {
+    event.preventDefault();
+    showCustomUploadCategoryInput(customUploadCategory);
+    return;
+  }
+
   const uploadCategory = event.target.closest("[data-upload-category]");
   if (uploadCategory) {
     uploadCategory.parentElement.querySelectorAll("[data-upload-category]").forEach(item => item.classList.toggle("active", item === uploadCategory));
@@ -1227,6 +1434,14 @@ document.addEventListener("change", event => {
 });
 
 document.addEventListener("input", event => {
+  const projectDurationInput = event.target.closest("[data-project-duration-range], [data-project-duration-input]");
+  if (projectDurationInput) {
+    projectParamDraft.durationMode = "custom";
+    projectParamDraft.duration = normalizeProjectDuration(projectDurationInput.value);
+    renderProjectParamOptions();
+    return;
+  }
+
   const productNameInput = event.target.closest("[data-product-name-input]");
   if (productNameInput) {
     const modal = productNameInput.closest(".product-create-modal");
@@ -1236,18 +1451,47 @@ document.addEventListener("input", event => {
 });
 
 document.addEventListener("keydown", event => {
+  const customUploadCategoryInput = event.target.closest(".product-custom-category-input");
+  if (customUploadCategoryInput && event.key === "Enter") {
+    event.preventDefault();
+    createCustomUploadCategory(customUploadCategoryInput);
+    return;
+  }
+  if (customUploadCategoryInput && event.key === "Escape") {
+    event.preventDefault();
+    customUploadCategoryInput.replaceWith(createCustomUploadTrigger());
+    return;
+  }
+
   const modelEditTagInput = event.target.closest("[data-model-edit-tag-input]");
   if (modelEditTagInput && event.key === "Enter") {
     event.preventDefault();
     addModelEditTag(modelEditTagInput);
     return;
   }
+
+  const projectTitleInput = event.target.closest("[data-project-title-input]");
+  if (projectTitleInput && event.key === "Enter") {
+    event.preventDefault();
+    saveProjectTitleEdit();
+    return;
+  }
+  if (projectTitleInput && event.key === "Escape") {
+    event.preventDefault();
+    cancelProjectTitleEdit();
+    return;
+  }
+
   if (event.key === "Escape") closeModals();
   if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-voice-audio-uploader]")) {
     event.preventDefault();
     const input = event.target.querySelector("[data-voice-audio-input]");
     if (input) input.click();
   }
+});
+
+document.addEventListener("focusout", event => {
+  if (event.target.closest("[data-project-title-input]")) saveProjectTitleEdit();
 });
 
 const taskList = document.getElementById("taskList");
