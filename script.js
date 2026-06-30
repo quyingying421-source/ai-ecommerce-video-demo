@@ -274,8 +274,8 @@ let currentVideoDetail = {
 function hydrateVideoDetail(trigger) {
   if (!trigger) return;
   const image = trigger.querySelector(".poster-image");
-  const title = trigger.querySelector(".poster-title")?.textContent?.trim() || "无袖背心阔腿裤简约穿搭";
-  const category = trigger.querySelector(".poster-category")?.textContent?.trim() || "服装";
+  const title = trigger.dataset.videoTitle || trigger.querySelector(".poster-title")?.textContent?.trim() || "无袖背心阔腿裤简约穿搭";
+  const category = trigger.dataset.videoCategory || trigger.querySelector(".poster-category")?.textContent?.trim() || "服装";
   const titleEl = document.querySelector("[data-video-detail-title]");
   const coverEl = document.querySelector("[data-video-detail-cover]");
   const categoryEl = document.querySelector("[data-video-detail-category]");
@@ -362,6 +362,7 @@ const projectSelectedLabelMap = {
 const projectDetailResourceConfig = {
   video: {
     label: "已选视频",
+    emptyTitle: "视频",
     emptyLabel: "上传参考视频",
     modal: "project-video-select",
     imageClass: "project-selected-cover",
@@ -371,6 +372,7 @@ const projectDetailResourceConfig = {
   },
   product: {
     label: "已选商品图",
+    emptyTitle: "商品图",
     emptyLabel: "上传商品图",
     modal: "project-product-select",
     imageClass: "project-selected-image",
@@ -380,6 +382,7 @@ const projectDetailResourceConfig = {
   },
   model: {
     label: "已选模特",
+    emptyTitle: "模特",
     emptyLabel: "上传模特",
     modal: "project-model-select",
     imageClass: "project-selected-image",
@@ -389,6 +392,7 @@ const projectDetailResourceConfig = {
   },
   voice: {
     label: "已选音色",
+    emptyTitle: "音色",
     emptyLabel: "上传音色",
     modal: "project-voice-select",
     imageClass: "project-selected-image",
@@ -431,6 +435,15 @@ function updateProjectParamSummary() {
   if (voice) voice.textContent = projectParamState.voice === "on" ? "人声" : "无人声";
 }
 
+function updateProjectDurationRangeFill(range) {
+  if (!range) return;
+  const min = Number(range.min) || 4;
+  const max = Number(range.max) || 45;
+  const value = Math.min(max, Math.max(min, Number(range.value) || min));
+  const percent = max === min ? 0 : ((value - min) / (max - min)) * 100;
+  range.style.setProperty("--project-duration-fill", `${percent}%`);
+}
+
 function renderProjectParamOptions() {
   document.querySelectorAll("[data-project-param-option]").forEach(button => {
     const key = button.dataset.projectParamOption;
@@ -440,6 +453,7 @@ function renderProjectParamOptions() {
   durationControl?.classList.toggle("is-disabled", projectParamDraft.durationMode !== "custom");
   document.querySelectorAll("[data-project-duration-range], [data-project-duration-input]").forEach(input => {
     input.value = projectParamDraft.duration;
+    if (input.matches("[data-project-duration-range]")) updateProjectDurationRangeFill(input);
   });
 }
 
@@ -512,6 +526,75 @@ function syncProjectFissionCost(count = getProjectFissionCount()) {
   });
 }
 
+function getProjectFissionCards() {
+  return Array.from(document.querySelectorAll(".project-fission-result-grid > div"));
+}
+
+function ensureProjectFissionCardActions(card) {
+  if (!card.querySelector(".poster-image")) {
+    card.insertAdjacentHTML("beforeend", '<img class="poster-image" src="assets/task-video-cover.png" alt="">');
+  }
+  if (!card.querySelector("[data-project-fission-result-check]")) {
+    card.insertAdjacentHTML("beforeend", '<button class="project-fission-card-check" type="button" data-project-fission-result-check aria-label="选择裂变视频"></button>');
+  }
+  if (!card.querySelector("[data-project-fission-result-download]")) {
+    card.insertAdjacentHTML("beforeend", '<button class="project-fission-card-download" type="button" data-project-fission-result-download>下载</button>');
+  }
+  card.dataset.modal = "video-detail";
+  card.dataset.videoTitle = card.dataset.videoTitle || "最终合成视频";
+  card.dataset.videoCategory = card.dataset.videoCategory || "裂变视频";
+}
+
+function renderProjectFissionCards(generatedCount = 0, waitingText = "待生成") {
+  getProjectFissionCards().forEach((card, index) => {
+    const done = index < generatedCount;
+    card.classList.toggle("done", done);
+    card.classList.remove("is-selected");
+    if (done) ensureProjectFissionCardActions(card);
+    const label = card.querySelector("span");
+    if (label) {
+      label.className = done ? "poster-play" : "";
+      label.textContent = done ? "" : waitingText;
+    }
+    if (!done) card.removeAttribute("data-modal");
+  });
+  resetProjectFissionSelection();
+}
+
+function updateProjectFissionSelection() {
+  const selectedCount = document.querySelectorAll(".project-fission-result-grid > div.done.is-selected").length;
+  const countLabel = document.querySelector("[data-project-fission-selected-count]");
+  const downloadButton = document.querySelector("[data-project-fission-download]");
+  if (countLabel) {
+    countLabel.textContent = `已选：${selectedCount}个`;
+    countLabel.hidden = selectedCount === 0;
+  }
+  if (downloadButton) {
+    downloadButton.disabled = selectedCount === 0;
+    downloadButton.classList.toggle("is-active", selectedCount > 0);
+  }
+}
+
+function resetProjectFissionSelection() {
+  document.querySelector(".project-fission-workspace")?.classList.remove("is-selecting");
+  getProjectFissionCards().forEach(card => card.classList.remove("is-selected"));
+  updateProjectFissionSelection();
+}
+
+function selectAllProjectFissionResults() {
+  const doneCards = getProjectFissionCards().filter(card => card.classList.contains("done"));
+  if (!doneCards.length) {
+    showToast("暂无可选择的裂变视频");
+    return;
+  }
+  document.querySelector(".project-fission-workspace")?.classList.add("is-selecting");
+  doneCards.forEach(card => {
+    ensureProjectFissionCardActions(card);
+    card.classList.add("is-selected");
+  });
+  updateProjectFissionSelection();
+}
+
 function setBadgeState(el, state) {
   if (!el) return;
   el.classList.remove("info", "success", "warning", "danger", "gray");
@@ -533,8 +616,8 @@ function renderProjectSelectedResource(type, resource) {
   if (!resource) {
     card.classList.add("is-empty");
     card.innerHTML = `
-      <span class="project-selected-card-label">${config.label}</span>
-      <button class="project-selected-empty-btn" type="button" data-project-empty-resource="${type}" data-modal="${config.modal}"><i></i>${config.emptyLabel}</button>
+      <span class="project-selected-card-label">${config.emptyTitle}</span>
+      <button class="project-selected-empty-btn" type="button" data-project-empty-resource="${type}" data-modal="${config.modal}" aria-haspopup="dialog"><i></i>${config.emptyLabel}</button>
       <p>${config.emptyDesc}</p>
     `;
     return;
@@ -551,6 +634,14 @@ function renderProjectSelectedResource(type, resource) {
       <p>${resource.desc || config.desc}</p>
     </div>
   `;
+}
+
+function openProjectEmptyResourceModal(trigger) {
+  const type = trigger?.dataset.projectEmptyResource;
+  const modal = trigger?.dataset.modal || projectDetailResourceConfig[type]?.modal;
+  if (!modal) return false;
+  openModal(modal, trigger);
+  return true;
 }
 
 function resetProjectDetailProgress() {
@@ -576,11 +667,7 @@ function resetProjectDetailProgress() {
     item.classList.remove("complete");
   });
   document.querySelectorAll(".project-flow-steps i").forEach(line => line.classList.remove("complete"));
-  document.querySelectorAll(".project-fission-result-grid div").forEach(card => {
-    card.classList.remove("done");
-    const label = card.querySelector("span");
-    if (label) label.textContent = "待生成";
-  });
+  renderProjectFissionCards(0, "待生成");
   setProjectFissionButtons("一键裂变", true);
   syncProjectFissionCost();
 }
@@ -621,6 +708,8 @@ function openProjectRemakeDetail() {
 function selectResource(type, label, meta, trigger) {
   const config = projectResourceMap[type];
   if (!config) return;
+  const generatePage = document.querySelector("[data-project-generate-page]");
+  const isProjectDetailActive = generatePage?.classList.contains("is-active");
   const resourceButton = document.querySelector(`[data-project-resource="${type}"]`);
   if (resourceButton) {
     const icon = resourceButton.querySelector(".project-attach-icon");
@@ -631,8 +720,7 @@ function selectResource(type, label, meta, trigger) {
   }
   const selectedLabel = document.querySelector(projectSelectedLabelMap[type]);
   if (selectedLabel) selectedLabel.textContent = label;
-  const generatePage = document.querySelector("[data-project-generate-page]");
-  if (generatePage?.classList.contains("is-active")) {
+  if (isProjectDetailActive) {
     renderProjectSelectedResource(type, {
       label,
       image: getProjectResourceImage(type, trigger),
@@ -640,8 +728,10 @@ function selectResource(type, label, meta, trigger) {
     });
   }
   closeModals();
-  const navButton = document.querySelector('button[data-page="project"]');
-  show("project", navButton);
+  if (!isProjectDetailActive) {
+    const navButton = document.querySelector('button[data-page="project"]');
+    show("project", navButton);
+  }
   showToast(meta || `${label}已用于当前项目`);
 }
 
@@ -820,12 +910,7 @@ function openTaskProjectDetail(taskId, trigger) {
     item.innerHTML = parts.length > 1 ? `<b>${parts[0]}</b> ${parts.slice(1).join(" ")}` : `<b>${data.metrics[index]}</b>`;
   });
 
-  document.querySelectorAll(".project-fission-result-grid div").forEach((card, index) => {
-    const shouldMarkDone = data.generated || (data.failed && index < 7);
-    card.classList.toggle("done", shouldMarkDone);
-    const label = card.querySelector("span");
-    if (label) label.textContent = shouldMarkDone ? "已生成" : "待生成";
-  });
+  renderProjectFissionCards(data.generated ? 12 : (data.failed ? 7 : 0), "待生成");
 
   updateTaskDetailFlow(data);
 
@@ -908,11 +993,7 @@ function startProjectFission() {
     if (statusText) statusText.textContent = `已生成 ${fissionCountValue} 个场景裂变视频`;
     const fissionCount = document.querySelector(".project-fission-workspace-head span");
     if (fissionCount) fissionCount.textContent = `已生成 ${fissionCountValue} 个`;
-    document.querySelectorAll(".project-fission-result-grid div").forEach((card, index) => {
-      card.classList.toggle("done", index < fissionCountValue);
-      const label = card.querySelector("span");
-      if (label) label.textContent = index < fissionCountValue ? "已生成" : "待选择";
-    });
+    renderProjectFissionCards(fissionCountValue, "待选择");
     setProjectFissionButtons(`再裂变 ${fissionCountValue} 个`, false);
     showToast(`已生成 ${fissionCountValue} 个裂变视频`);
   }, 900);
@@ -929,11 +1010,7 @@ function startProjectGenerate() {
   if (outputPanel) outputPanel.classList.remove("is-generated", "is-fission", "is-running", "is-task-failed");
   const fissionCount = document.querySelector(".project-fission-workspace-head span");
   if (fissionCount) fissionCount.textContent = "已生成 0 个";
-  document.querySelectorAll(".project-fission-result-grid div").forEach(card => {
-    card.classList.remove("done");
-    const label = card.querySelector("span");
-    if (label) label.textContent = "待生成";
-  });
+  renderProjectFissionCards(0, "待生成");
   if (fissionButton) setProjectFissionButtons("一键裂变", true);
   syncProjectFissionCost();
   let stepIndex = 0;
@@ -1186,6 +1263,14 @@ document.querySelectorAll(".product-modal").forEach(modal => {
   if (activeCategory) updateUploadSlots(activeCategory, modal);
 });
 
+document.querySelector(".project-selected-rail")?.addEventListener("click", event => {
+  const projectEmptyResource = event.target.closest("[data-project-empty-resource]");
+  if (!projectEmptyResource) return;
+  event.preventDefault();
+  event.stopPropagation();
+  openProjectEmptyResourceModal(projectEmptyResource);
+});
+
 document.addEventListener("click", event => {
   const projectRemake = event.target.closest("[data-project-remake]");
   if (projectRemake) {
@@ -1267,6 +1352,54 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const fissionSelectAll = event.target.closest("[data-project-fission-select-all]");
+  if (fissionSelectAll) {
+    event.preventDefault();
+    selectAllProjectFissionResults();
+    return;
+  }
+
+  const fissionBatchDownload = event.target.closest("[data-project-fission-download]");
+  if (fissionBatchDownload) {
+    event.preventDefault();
+    const selectedCount = document.querySelectorAll(".project-fission-result-grid > div.done.is-selected").length;
+    if (!selectedCount) return;
+    showToast(`已开始下载 ${selectedCount} 个裂变视频`);
+    return;
+  }
+
+  const fissionCardDownload = event.target.closest("[data-project-fission-result-download]");
+  if (fissionCardDownload) {
+    event.preventDefault();
+    event.stopPropagation();
+    showToast("裂变视频下载已开始");
+    return;
+  }
+
+  const fissionCardCheck = event.target.closest("[data-project-fission-result-check]");
+  if (fissionCardCheck) {
+    event.preventDefault();
+    event.stopPropagation();
+    const card = fissionCardCheck.closest(".project-fission-result-grid > div.done");
+    if (!card) return;
+    card.classList.toggle("is-selected");
+    updateProjectFissionSelection();
+    return;
+  }
+
+  const fissionDoneCard = event.target.closest(".project-fission-result-grid > div.done");
+  if (fissionDoneCard) {
+    event.preventDefault();
+    if (fissionDoneCard.closest(".project-fission-workspace")?.classList.contains("is-selecting")) {
+      fissionDoneCard.classList.toggle("is-selected");
+      updateProjectFissionSelection();
+      return;
+    }
+    hydrateVideoDetail(fissionDoneCard);
+    openModal("video-detail", fissionDoneCard);
+    return;
+  }
+
   const projectFission = event.target.closest("[data-project-fission]");
   if (projectFission) {
     event.preventDefault();
@@ -1286,9 +1419,7 @@ document.addEventListener("click", event => {
   if (projectEmptyResource) {
     event.preventDefault();
     event.stopPropagation();
-    const type = projectEmptyResource.dataset.projectEmptyResource;
-    const modal = projectDetailResourceConfig[type]?.modal;
-    if (modal) openModal(modal, projectEmptyResource);
+    openProjectEmptyResourceModal(projectEmptyResource);
     return;
   }
 
