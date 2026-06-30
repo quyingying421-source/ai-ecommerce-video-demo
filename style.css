@@ -1992,12 +1992,14 @@ img.voice-avatar {
 }
 
 .project-exit-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  justify-content: flex-end;
   gap: 12px;
 }
 
 .project-exit-actions .btn {
+  width: 116px;
+  min-width: 116px;
   height: 40px;
   border-radius: 8px;
   font-size: 15px;
@@ -4549,12 +4551,7 @@ textarea.form-control {
   width: 20px;
   height: 20px;
   margin: 0 auto 8px;
-  background:
-    linear-gradient(#657084, #657084) center 4px / 2px 10px no-repeat,
-    linear-gradient(135deg, transparent 47%, #657084 48% 58%, transparent 59%) 6px 2px / 8px 8px no-repeat,
-    linear-gradient(45deg, transparent 47%, #657084 48% 58%, transparent 59%) 6px 2px / 8px 8px no-repeat,
-    linear-gradient(#657084, #657084) center 16px / 14px 2px no-repeat;
-  border-radius: 4px;
+  background: url("assets/product-upload-icon.png") center / contain no-repeat;
 }
 
 [data-modal-panel="product-upload"] .product-upload-warning {
@@ -8112,7 +8109,7 @@ textarea.form-control {
   border: 1px solid #dfe5f1;
   border-radius: 999px;
   background: #fff;
-  color: #252632;
+  color: #566175;
   font: inherit;
   font-size: 13px;
   line-height: 18px;
@@ -8230,7 +8227,47 @@ textarea.form-control {
 
 .page[data-page="project"] .project-param-duration-control input[type="range"] {
   width: 100%;
+  height: 6px;
+  border: 0;
+  outline: 0;
+  border-radius: 999px;
+  background: #dfe6f3;
   accent-color: #505CFF;
+  appearance: none;
+}
+
+.page[data-page="project"] .project-param-duration-control input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: #dfe6f3;
+}
+
+.page[data-page="project"] .project-param-duration-control input[type="range"]::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 50%;
+  background: #505CFF;
+  box-shadow: none;
+  appearance: none;
+}
+
+.page[data-page="project"] .project-param-duration-control input[type="range"]::-moz-range-track {
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: #dfe6f3;
+}
+
+.page[data-page="project"] .project-param-duration-control input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: #505CFF;
+  box-shadow: none;
 }
 
 .page[data-page="project"] .project-param-duration-control label {
@@ -8533,44 +8570,26 @@ textarea.form-control {
 }
 
 .project-title-edit-btn {
-  position: relative;
-  width: 24px;
-  height: 24px;
-  flex: 0 0 24px;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
   border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: #657084;
+  border-radius: 0;
+  background: url("assets/edit-icon.png") center / 20px 20px no-repeat;
   cursor: pointer;
 }
 
 .project-title-edit-btn:hover {
-  background: #f4f6fb;
-  color: #505CFF;
+  background: url("assets/edit-icon.png") center / 20px 20px no-repeat;
+  opacity: .86;
 }
 
 .project-title-edit-btn::before {
-  content: "";
-  position: absolute;
-  left: 7px;
-  top: 6px;
-  width: 10px;
-  height: 4px;
-  border: 1.6px solid currentColor;
-  border-radius: 2px;
-  transform: rotate(-35deg);
+  content: none;
 }
 
 .project-title-edit-btn::after {
-  content: "";
-  position: absolute;
-  left: 5px;
-  bottom: 5px;
-  width: 12px;
-  height: 1.6px;
-  border-radius: 999px;
-  background: currentColor;
-  opacity: .65;
+  content: none;
 }
 
 .project-generate-title strong {
@@ -8581,6 +8600,10 @@ textarea.form-control {
 }
 
 .project-generate-title.is-editing strong {
+  display: none;
+}
+
+.project-generate-title.is-editing .project-title-edit-btn {
   display: none;
 }
 
@@ -8664,6 +8687,7 @@ textarea.form-control {
 }
 
 .project-selected-card {
+  position: relative;
   display: grid;
   grid-template-columns: 86px minmax(0, 1fr);
   gap: 12px;
@@ -8680,6 +8704,20 @@ textarea.form-control {
   align-items: start;
   background: #fff;
   box-shadow: 0 12px 28px rgba(37, 38, 50, .06);
+}
+
+.project-selected-card.is-empty {
+  display: block;
+  padding: 14px;
+  background: #fff;
+}
+
+.project-selected-card-top {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .project-selected-card-label {
@@ -8702,6 +8740,74 @@ textarea.form-control {
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
+}
+
+.project-selected-remove {
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid #dfe5f1;
+  border-radius: 999px;
+  background: #fff;
+  color: #657084;
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.project-selected-remove:hover {
+  border-color: #bfc8d8;
+  color: #252632;
+}
+
+.project-selected-empty-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 54px;
+  margin-top: 10px;
+  border: 1px dashed #cfd8ea;
+  border-radius: 8px;
+  background: #fbfcff;
+  color: #505CFF;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.project-selected-empty-btn:hover {
+  border-color: #505CFF;
+  background: #f4f6ff;
+}
+
+.project-selected-empty-btn i {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #eef1ff;
+}
+
+.project-selected-empty-btn i::before,
+.project-selected-empty-btn i::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 999px;
+  background: #505CFF;
+  transform: translate(-50%, -50%);
+}
+
+.project-selected-empty-btn i::before {
+  width: 10px;
+  height: 2px;
+}
+
+.project-selected-empty-btn i::after {
+  width: 2px;
+  height: 10px;
 }
 
 .project-selected-card p {
@@ -8760,6 +8866,22 @@ textarea.form-control {
   height: 52px;
   border-radius: 12px;
   object-fit: cover;
+}
+
+.project-selected-sticky-actions {
+  position: sticky;
+  bottom: -40px;
+  margin: 18px -22px -40px;
+  padding: 14px 22px 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .88), #fff 42%);
+  border-top: 1px solid #edf0f7;
+  z-index: 2;
+}
+
+.project-selected-generate {
+  width: 100%;
+  height: 42px;
+  border-radius: 8px;
 }
 
 .project-generate-main {
@@ -9107,7 +9229,7 @@ textarea.form-control {
   gap: 12px;
   align-items: start;
   width: 100%;
-  margin-top: 24px;
+  margin-top: 8px;
   padding: 16px 20px;
   border: 1px solid #dfe5f1;
   border-radius: 8px;

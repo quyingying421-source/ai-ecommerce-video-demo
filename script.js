@@ -265,6 +265,12 @@ function openModal(name, trigger) {
   }
 }
 
+let currentVideoDetail = {
+  title: "无袖背心阔腿裤简约穿搭",
+  image: "assets/plaza-covers/plaza-04.png",
+  category: "女装"
+};
+
 function hydrateVideoDetail(trigger) {
   if (!trigger) return;
   const image = trigger.querySelector(".poster-image");
@@ -280,6 +286,12 @@ function hydrateVideoDetail(trigger) {
   const scriptEl = document.querySelector("[data-video-detail-script]");
   const cta = document.querySelector(".video-detail-cta");
   const isKids = category.includes("童");
+  const fromProjectBoard = Boolean(trigger.closest(".project-video-board"));
+  currentVideoDetail = {
+    title,
+    image: image?.getAttribute("src") || "assets/plaza-covers/plaza-04.png",
+    category
+  };
   if (titleEl) titleEl.textContent = title;
   if (coverEl && image) coverEl.src = image.src;
   if (categoryEl) categoryEl.textContent = category;
@@ -295,6 +307,14 @@ function hydrateVideoDetail(trigger) {
   if (cta) {
     cta.dataset.resourceLabel = title;
     cta.dataset.resourceMeta = `已选择视频广场模板：${title}，可进入创建项目复刻同款`;
+    cta.dataset.resourceImage = currentVideoDetail.image;
+    if (fromProjectBoard) {
+      cta.dataset.projectRemake = "true";
+      delete cta.dataset.selectResource;
+    } else {
+      cta.dataset.selectResource = "video";
+      delete cta.dataset.projectRemake;
+    }
   }
 }
 
@@ -339,6 +359,45 @@ const projectSelectedLabelMap = {
   voice: "[data-project-selected-voice]"
 };
 
+const projectDetailResourceConfig = {
+  video: {
+    label: "已选视频",
+    emptyLabel: "上传参考视频",
+    modal: "project-video-select",
+    imageClass: "project-selected-cover",
+    fallbackImage: "assets/plaza-covers/plaza-04.png",
+    desc: "镜头节奏、构图和口播结构将作为本次生成参考。",
+    emptyDesc: "点击选择参考视频，用于解析节奏、镜头和口播结构。"
+  },
+  product: {
+    label: "已选商品图",
+    emptyLabel: "上传商品图",
+    modal: "project-product-select",
+    imageClass: "project-selected-image",
+    fallbackImage: "assets/product-cover-01.png",
+    desc: "5 张视角图，Logo 与材质细节已校验。",
+    emptyDesc: "从商品素材库选择商品图，系统会复用商品视角与卖点。"
+  },
+  model: {
+    label: "已选模特",
+    emptyLabel: "上传模特",
+    modal: "project-model-select",
+    imageClass: "project-selected-image",
+    fallbackImage: "assets/model-detail-source.png",
+    desc: "五视图已生成，适合通勤穿搭和鞋服展示。",
+    emptyDesc: "从模特库选择已创建模特，保持人物一致性。"
+  },
+  voice: {
+    label: "已选音色",
+    emptyLabel: "上传音色",
+    modal: "project-voice-select",
+    imageClass: "project-selected-image",
+    fallbackImage: "assets/voice-avatars/warm-female.png",
+    desc: "自然 / 轻快，适合短视频种草口播。",
+    emptyDesc: "从音色库选择口播音色，生成时用于人声表达。"
+  }
+};
+
 const PROJECT_FISSION_BEAN_COST = 3;
 const projectParamState = {
   ratio: "3:4",
@@ -368,7 +427,7 @@ function updateProjectParamSummary() {
   const voice = document.querySelector("[data-project-param-summary-voice]");
   if (ratio) ratio.textContent = projectParamState.ratio;
   if (resolution) resolution.textContent = projectParamState.resolution;
-  if (music) music.textContent = projectParamState.music === "on" ? "背景音乐" : "无背景音乐";
+  if (music) music.textContent = projectParamState.music === "on" ? "背景音频" : "无背景音频";
   if (voice) voice.textContent = projectParamState.voice === "on" ? "人声" : "无人声";
 }
 
@@ -459,7 +518,107 @@ function setBadgeState(el, state) {
   el.classList.add(state);
 }
 
-function selectResource(type, label, meta) {
+function getProjectResourceImage(type, trigger) {
+  const image = trigger?.closest(".project-select-card, .project-library-video-card, .project-upload-drop")?.querySelector("img");
+  return image?.getAttribute("src") || projectDetailResourceConfig[type]?.fallbackImage || "";
+}
+
+function renderProjectSelectedResource(type, resource) {
+  const config = projectDetailResourceConfig[type];
+  const card = document.querySelector(`[data-project-selected-card="${type}"]`);
+  if (!config || !card) return;
+
+  card.classList.toggle("hero", type === "video");
+  card.classList.toggle("compact", false);
+  if (!resource) {
+    card.classList.add("is-empty");
+    card.innerHTML = `
+      <span class="project-selected-card-label">${config.label}</span>
+      <button class="project-selected-empty-btn" type="button" data-project-empty-resource="${type}" data-modal="${config.modal}"><i></i>${config.emptyLabel}</button>
+      <p>${config.emptyDesc}</p>
+    `;
+    return;
+  }
+
+  card.classList.remove("is-empty");
+  const image = resource.image || config.fallbackImage;
+  const removeButton = type === "video" ? '<button class="project-selected-remove" type="button" data-project-remove-resource="video">删除</button>' : "";
+  card.innerHTML = `
+    <div class="project-selected-card-top"><span class="project-selected-card-label">${config.label}</span>${removeButton}</div>
+    <div class="${config.imageClass}"><img src="${image}" alt=""></div>
+    <div>
+      <strong ${projectSelectedLabelMap[type] ? projectSelectedLabelMap[type].replace("[", "").replace("]", "") : ""}>${resource.label}</strong>
+      <p>${resource.desc || config.desc}</p>
+    </div>
+  `;
+}
+
+function resetProjectDetailProgress() {
+  const generatePage = document.querySelector("[data-project-generate-page]");
+  const outputBadge = document.querySelector("[data-project-output-badge]");
+  const statusText = document.getElementById("projectCurrentStatus");
+  const percent = document.getElementById("projectProgressPercent");
+  const fill = document.getElementById("projectProgressFill");
+  const previewTitle = document.querySelector("[data-project-preview-title]");
+  const fissionCount = document.querySelector(".project-fission-workspace-head span");
+  if (generatePage) generatePage.classList.remove("is-running", "is-generated", "is-fission", "is-task-failed");
+  if (outputBadge) outputBadge.textContent = "待生成";
+  if (statusText) statusText.textContent = "等待提交生成任务";
+  if (percent) percent.textContent = "0%";
+  if (fill) fill.style.width = "0%";
+  if (previewTitle) previewTitle.textContent = "等待生成";
+  if (fissionCount) fissionCount.textContent = "已生成 0 个";
+  document.querySelectorAll("[data-project-status-step]").forEach(item => {
+    item.classList.toggle("active", Number(item.dataset.projectStatusStep) === 1);
+  });
+  document.querySelectorAll("[data-project-flow-step]").forEach(item => {
+    item.classList.toggle("active", Number(item.dataset.projectFlowStep) === 1);
+    item.classList.remove("complete");
+  });
+  document.querySelectorAll(".project-flow-steps i").forEach(line => line.classList.remove("complete"));
+  document.querySelectorAll(".project-fission-result-grid div").forEach(card => {
+    card.classList.remove("done");
+    const label = card.querySelector("span");
+    if (label) label.textContent = "待生成";
+  });
+  setProjectFissionButtons("一键裂变", true);
+  syncProjectFissionCost();
+}
+
+function openProjectRemakeDetail() {
+  const generatePage = document.querySelector("[data-project-generate-page]");
+  if (!generatePage) return;
+  clearInterval(projectGenerateTimer);
+  closeModals();
+  const navButton = document.querySelector('button[data-page="project"]');
+  show("project", navButton);
+  generatePage.classList.add("is-active");
+  resetProjectDetailProgress();
+
+  const headerBadge = generatePage.querySelector(".project-generate-title .badge");
+  const headerTitle = generatePage.querySelector("[data-project-title-text]");
+  const headerTitleInput = generatePage.querySelector("[data-project-title-input]");
+  const headerDesc = generatePage.querySelector(".project-generate-title p");
+  if (headerBadge) {
+    headerBadge.textContent = "视频生成";
+    setBadgeState(headerBadge, "info");
+  }
+  if (headerTitle) headerTitle.textContent = `复刻-${currentVideoDetail.title}`;
+  if (headerTitleInput) headerTitleInput.value = `复刻-${currentVideoDetail.title}`;
+  if (headerDesc) headerDesc.textContent = "已带入参考视频，请补充商品图、模特和音色后立即生成。";
+
+  renderProjectSelectedResource("video", {
+    label: currentVideoDetail.title,
+    image: currentVideoDetail.image,
+    desc: "镜头节奏、构图和口播结构将作为本次生成参考。"
+  });
+  renderProjectSelectedResource("product", null);
+  renderProjectSelectedResource("model", null);
+  renderProjectSelectedResource("voice", null);
+  showToast("已带入参考视频，可继续补充素材");
+}
+
+function selectResource(type, label, meta, trigger) {
   const config = projectResourceMap[type];
   if (!config) return;
   const resourceButton = document.querySelector(`[data-project-resource="${type}"]`);
@@ -472,6 +631,14 @@ function selectResource(type, label, meta) {
   }
   const selectedLabel = document.querySelector(projectSelectedLabelMap[type]);
   if (selectedLabel) selectedLabel.textContent = label;
+  const generatePage = document.querySelector("[data-project-generate-page]");
+  if (generatePage?.classList.contains("is-active")) {
+    renderProjectSelectedResource(type, {
+      label,
+      image: getProjectResourceImage(type, trigger),
+      desc: projectDetailResourceConfig[type]?.desc
+    });
+  }
   closeModals();
   const navButton = document.querySelector('button[data-page="project"]');
   show("project", navButton);
@@ -640,6 +807,11 @@ function openTaskProjectDetail(taskId, trigger) {
   Object.entries(data.selected).forEach(([type, label]) => {
     const target = document.querySelector(projectSelectedLabelMap[type]);
     if (target) target.textContent = label;
+    renderProjectSelectedResource(type, {
+      label,
+      image: type === "video" ? data.cover : projectDetailResourceConfig[type]?.fallbackImage,
+      desc: projectDetailResourceConfig[type]?.desc
+    });
   });
 
   document.querySelectorAll(".project-preview-metrics span").forEach((item, index) => {
@@ -1015,11 +1187,19 @@ document.querySelectorAll(".product-modal").forEach(modal => {
 });
 
 document.addEventListener("click", event => {
+  const projectRemake = event.target.closest("[data-project-remake]");
+  if (projectRemake) {
+    event.preventDefault();
+    event.stopPropagation();
+    openProjectRemakeDetail();
+    return;
+  }
+
   const selectTrigger = event.target.closest("[data-select-resource]");
   if (selectTrigger) {
     event.preventDefault();
     event.stopPropagation();
-    selectResource(selectTrigger.dataset.selectResource, selectTrigger.dataset.resourceLabel, selectTrigger.dataset.resourceMeta);
+    selectResource(selectTrigger.dataset.selectResource, selectTrigger.dataset.resourceLabel, selectTrigger.dataset.resourceMeta, selectTrigger);
     return;
   }
 
@@ -1091,6 +1271,24 @@ document.addEventListener("click", event => {
   if (projectFission) {
     event.preventDefault();
     startProjectFission();
+    return;
+  }
+
+  const projectRemoveResource = event.target.closest("[data-project-remove-resource]");
+  if (projectRemoveResource) {
+    event.preventDefault();
+    renderProjectSelectedResource(projectRemoveResource.dataset.projectRemoveResource, null);
+    showToast("已移除参考视频");
+    return;
+  }
+
+  const projectEmptyResource = event.target.closest("[data-project-empty-resource]");
+  if (projectEmptyResource) {
+    event.preventDefault();
+    event.stopPropagation();
+    const type = projectEmptyResource.dataset.projectEmptyResource;
+    const modal = projectDetailResourceConfig[type]?.modal;
+    if (modal) openModal(modal, projectEmptyResource);
     return;
   }
 

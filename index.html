@@ -85,7 +85,7 @@
                   </div>
                   <div class="project-param-popover-wrap" data-project-param-wrap>
                     <button class="project-param-summary" type="button" aria-label="参数设置" data-project-param-trigger>
-                      <span data-project-param-summary-ratio>3:4</span><i></i><span data-project-param-summary-resolution>720p</span><i></i><span data-project-param-summary-music>背景音乐</span><i></i><span data-project-param-summary-voice>人声</span>
+                      <span data-project-param-summary-ratio>3:4</span><i></i><span data-project-param-summary-resolution>720p</span><i></i><span data-project-param-summary-music>背景音频</span><i></i><span data-project-param-summary-voice>人声</span>
                     </button>
                     <div class="project-param-popover" data-project-param-popover>
                       <div class="project-param-popover-title">参数设置</div>
@@ -118,7 +118,6 @@
                             <input type="number" min="4" max="45" value="15" data-project-duration-input>
                             <span>秒</span>
                           </label>
-                          <small>可选 4-45 秒</small>
                         </div>
                       </div>
                       <div class="project-param-toggle-row">
@@ -519,8 +518,8 @@
         <span class="badge info">视频生成</span>
         <div class="project-title-copy">
           <div class="project-title-edit-row">
-            <button class="project-title-edit-btn" type="button" aria-label="编辑项目名称" data-project-title-edit></button>
             <strong data-project-title-text>项目-2026/6/29 15:30:00</strong>
+            <button class="project-title-edit-btn" type="button" aria-label="编辑项目名称" data-project-title-edit></button>
             <input class="project-title-input" type="text" value="项目-2026/6/29 15:30:00" data-project-title-input hidden>
           </div>
           <p>参考视频解析、商品匹配、成片合成与裂变结果集中展示</p>
@@ -536,7 +535,7 @@
           <h3>项目素材</h3>
           <p>本次生成将复用这些素材的风格、商品和音色</p>
         </div>
-        <div class="project-selected-card hero">
+        <div class="project-selected-card hero" data-project-selected-card="video">
           <span class="project-selected-card-label">已选视频</span>
           <div class="project-selected-cover"><img src="assets/plaza-covers/plaza-04.png" alt=""></div>
           <div>
@@ -544,7 +543,7 @@
             <p>镜头节奏、构图和口播结构将作为本次生成参考。</p>
           </div>
         </div>
-        <div class="project-selected-card">
+        <div class="project-selected-card" data-project-selected-card="product">
           <span class="project-selected-card-label">已选商品图</span>
           <div class="project-selected-image"><img src="assets/product-cover-01.png" alt=""></div>
           <div>
@@ -552,7 +551,7 @@
             <p>5 张视角图，Logo 与材质细节已校验。</p>
           </div>
         </div>
-        <div class="project-selected-card">
+        <div class="project-selected-card" data-project-selected-card="model">
           <span class="project-selected-card-label">已选模特</span>
           <div class="project-selected-image"><img src="assets/model-detail-source.png" alt=""></div>
           <div>
@@ -560,13 +559,16 @@
             <p>五视图已生成，适合通勤穿搭和鞋服展示。</p>
           </div>
         </div>
-        <div class="project-selected-card compact">
+        <div class="project-selected-card compact" data-project-selected-card="voice">
           <span class="project-selected-card-label">已选音色</span>
           <img src="assets/voice-avatars/warm-female.png" alt="">
           <div>
             <strong data-project-selected-voice>清爽女声</strong>
             <p>自然 / 轻快，适合短视频种草口播。</p>
           </div>
+        </div>
+        <div class="project-selected-sticky-actions">
+          <button class="btn primary project-selected-generate" type="button" data-start-generate>立即生成</button>
         </div>
       </aside>
       <main class="project-generate-main">
