@@ -107,20 +107,20 @@ function updateVoiceModalMode(trigger) {
 function setActiveVoicePlay(trigger) {
   if (trigger.classList.contains("is-playing")) {
     trigger.classList.remove("is-playing");
-    const currentLabel = trigger.querySelector("span");
-    if (currentLabel) currentLabel.textContent = "播放";
+    trigger.setAttribute("aria-label", trigger.getAttribute("aria-label")?.replace("暂停", "播放") || "播放音色");
+    trigger.title = "播放";
     return;
   }
 
-  document.querySelectorAll('.page[data-page="voices"] .voice-play.is-playing').forEach(button => {
+  document.querySelectorAll('.page[data-page="voices"] .voice-play.is-playing, [data-modal-panel="project-voice-select"] .voice-play.is-playing').forEach(button => {
     if (button === trigger) return;
     button.classList.remove("is-playing");
-    const label = button.querySelector("span");
-    if (label) label.textContent = "播放";
+    button.setAttribute("aria-label", button.getAttribute("aria-label")?.replace("暂停", "播放") || "播放音色");
+    button.title = "播放";
   });
   trigger.classList.add("is-playing");
-  const label = trigger.querySelector("span");
-  if (label) label.textContent = "播放中";
+  trigger.setAttribute("aria-label", trigger.getAttribute("aria-label")?.replace("播放", "暂停") || "暂停音色");
+  trigger.title = "暂停";
 }
 
 function formatFileSize(bytes) {
@@ -151,6 +151,47 @@ let modelCreateTimer;
 
 function getModelCreateModal() {
   return document.querySelector('[data-modal-panel="model-create"] .model-create-modal');
+}
+
+function getModelCreateMode(panel = getModelCreateModal()) {
+  return panel?.dataset.modelCreateMode || "text";
+}
+
+function getTextModelSelections(panel = getModelCreateModal()) {
+  if (!panel) return [];
+  const values = [];
+  panel.querySelectorAll('[data-model-create-mode-panel="text"] .model-option-grid button.active').forEach(button => {
+    const value = button.dataset.value || button.textContent.trim();
+    if (value) values.push(value);
+  });
+  panel.querySelectorAll('[data-model-create-mode-panel="text"] .model-text-custom').forEach(input => {
+    const value = input.value.trim();
+    if (value) values.push(value);
+  });
+  const prompt = panel.querySelector("[data-model-text-prompt]")?.value.trim();
+  if (prompt) values.push(prompt);
+  return values;
+}
+
+function isTextModelReady(panel = getModelCreateModal()) {
+  if (!panel) return false;
+  return Array.from(panel.querySelectorAll("[data-model-text-required]")).every(group => group.querySelector("button.active"));
+}
+
+function updateTextModelSummary(panel = getModelCreateModal()) {
+  if (!panel) return;
+  const summary = panel.querySelector("[data-model-text-summary]");
+  if (!summary) return;
+  const values = getTextModelSelections(panel);
+  if (!values.length) {
+    summary.textContent = "请先选择年龄、性别、肤色";
+  } else {
+    summary.innerHTML = values.slice(0, 10).map(value => `<span class="badge">${value}</span>`).join("");
+  }
+  const primary = panel.querySelector("[data-model-create-primary]");
+  if (primary && getModelCreateMode(panel) === "text") {
+    primary.disabled = !isTextModelReady(panel);
+  }
 }
 
 function setModelCreateSteps(panel, state) {
@@ -191,21 +232,68 @@ function setModelCreateState(state) {
   const primary = panel.querySelector("[data-model-create-primary]");
   const dismiss = panel.querySelector("[data-dismiss]");
   if (primary) {
-    const labelMap = {
-      idle: "生成五视图",
-      analyzing: "深度分析中...",
-      analyzed: "生成五视图",
-      generating: "正在生成五视图...",
-      complete: "确定创建"
-    };
-    primary.textContent = labelMap[state] || "生成五视图";
-    primary.disabled = ["idle", "analyzing", "generating"].includes(state);
+    if (getModelCreateMode(panel) === "text") {
+      primary.textContent = "生成模特";
+      primary.disabled = !isTextModelReady(panel);
+    } else {
+      const labelMap = {
+        idle: "生成五视图",
+        analyzing: "深度分析中...",
+        analyzed: "生成五视图",
+        generating: "正在生成五视图...",
+        complete: "确定创建"
+      };
+      primary.textContent = labelMap[state] || "生成五视图";
+      primary.disabled = ["idle", "analyzing", "generating"].includes(state);
+    }
   }
   if (dismiss) dismiss.textContent = state === "complete" ? "关闭" : "取消";
 }
 
-function resetModelCreateModal() {
+function setModelCreateMode(mode) {
+  const panel = getModelCreateModal();
+  if (!panel) return;
+  panel.dataset.modelCreateMode = mode;
+  const title = panel.querySelector("[data-model-create-title]");
+  const desc = panel.querySelector("[data-model-create-desc]");
+  if (title) title.textContent = mode === "image" ? "图生模特" : "文生模特";
+  if (desc) {
+    desc.textContent = mode === "image"
+      ? "上传参考人物图片并生成可复用 AI 模特五视图。"
+      : "通过结构化特征和自然语言描述生成可复用 AI 模特。";
+  }
+  panel.querySelectorAll("[data-model-create-mode-panel]").forEach(modePanel => {
+    modePanel.classList.toggle("active", modePanel.dataset.modelCreateModePanel === mode);
+  });
+  setModelCreateState(mode === "text" ? "idle" : panel.dataset.modelCreateState || "idle");
+  updateTextModelSummary(panel);
+}
+
+function resetTextModel(panel = getModelCreateModal()) {
+  if (!panel) return;
+  panel.querySelectorAll('[data-model-create-mode-panel="text"] .model-option-grid button.active').forEach(button => {
+    button.classList.remove("active");
+  });
+  panel.querySelectorAll('[data-model-create-mode-panel="text"] .model-text-custom, [data-model-text-prompt]').forEach(input => {
+    input.value = "";
+  });
+  const reference = panel.querySelector(".model-text-reference");
+  reference?.classList.remove("is-analyzed");
+  const referenceButton = panel.querySelector("[data-text-model-reference]");
+  if (referenceButton) referenceButton.innerHTML = '<span class="model-ref-plus"></span>上传参考图并分析';
+  panel.querySelectorAll("[data-model-text-section-tab]").forEach((button, index) => {
+    button.classList.toggle("active", index === 0);
+  });
+  panel.querySelectorAll("[data-model-text-section]").forEach(section => {
+    section.classList.toggle("active", section.dataset.modelTextSection === "basic");
+  });
+  updateTextModelSummary(panel);
+}
+
+function resetModelCreateModal(mode = "text") {
   clearTimeout(modelCreateTimer);
+  setModelCreateMode(mode);
+  resetTextModel();
   setModelCreateState("idle");
 }
 
@@ -225,6 +313,71 @@ function startModelFiveViewGeneration() {
     setModelCreateState("complete");
     showToast("五视图生成完成");
   }, 1800);
+}
+
+function analyzeTextModelReference() {
+  const panel = getModelCreateModal();
+  if (!panel) return;
+  const reference = panel.querySelector(".model-text-reference");
+  reference?.classList.add("is-analyzed");
+  const values = {
+    age: "青年",
+    gender: "女性",
+    skin: "亚洲自然肤色"
+  };
+  Object.entries(values).forEach(([key, value]) => {
+    const group = panel.querySelector(`[data-model-text-required="${key}"]`);
+    group?.querySelectorAll("button").forEach(button => {
+      button.classList.toggle("active", button.dataset.value === value);
+    });
+  });
+  ["长发", "鹅蛋脸", "自然微笑", "真实感", "通勤"].forEach(value => {
+    const button = panel.querySelector(`[data-model-create-mode-panel="text"] .model-option-grid button[data-value="${value}"]`);
+    button?.classList.add("active");
+  });
+  const prompt = panel.querySelector("[data-model-text-prompt]");
+  if (prompt && !prompt.value.trim()) {
+    prompt.value = "参考图分析为年轻亚洲女性，整体通勤自然风，适合服装和箱包短视频。";
+  }
+  const referenceButton = panel.querySelector("[data-text-model-reference]");
+  if (referenceButton) referenceButton.textContent = "已分析参考图";
+  updateTextModelSummary(panel);
+  showToast("参考图特征已填入文生配置");
+}
+
+function submitTextModelCreate() {
+  const panel = getModelCreateModal();
+  if (!isTextModelReady(panel)) {
+    showToast("请先选择年龄、性别、肤色");
+    return;
+  }
+  closeModals();
+  showToast("文生模特配置已创建，出图能力待接入");
+}
+
+function applyModelDetailSource(trigger) {
+  const modal = document.querySelector('[data-modal-panel="model-detail"] .model-detail-modal');
+  if (!modal) return;
+  const sourceKind = trigger?.dataset.modelSourceKind || "image";
+  modal.dataset.modelSourceKind = sourceKind;
+  const type = modal.querySelector("[data-model-source-type]");
+  const note = modal.querySelector("[data-model-source-note]");
+  const desc = modal.querySelector("[data-model-source-desc]");
+  if (sourceKind === "text-no-reference") {
+    if (type) type.textContent = "文生模特";
+    if (note) note.textContent = "无参考图";
+    if (desc) desc.textContent = "该模特由结构化特征与自由描述生成，无原始参考图。";
+    return;
+  }
+  if (sourceKind === "text-reference") {
+    if (type) type.textContent = "文生模特";
+    if (note) note.textContent = "参考图辅助分析";
+    if (desc) desc.textContent = "参考图仅用于提取年龄、性别、肤色、发型等特征，生成仍以文字配置为准。";
+    return;
+  }
+  if (type) type.textContent = "图生模特";
+  if (note) note.textContent = "用户上传原图";
+  if (desc) desc.textContent = "都市通勤女模特，适合服装、箱包和配饰短视频。";
 }
 
 function addModelEditTag(input) {
@@ -252,7 +405,8 @@ function addModelEditTag(input) {
 function openModal(name, trigger) {
   closeModals();
   if (name === "voice-upload") updateVoiceModalMode(trigger);
-  if (name === "model-create") resetModelCreateModal();
+  if (name === "model-create") resetModelCreateModal(trigger?.dataset.modelCreateChoice || "text");
+  if (name === "model-detail") applyModelDetailSource(trigger);
   if (name === "product-upload") resetProductUploadModal();
   if (name === "product-edit") applyProductDetailData();
   const panel = document.querySelector(`[data-modal-panel="${name}"]`);
@@ -1385,6 +1539,14 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const projectVoicePlayTrigger = event.target.closest('[data-modal-panel="project-voice-select"] .voice-play');
+  if (projectVoicePlayTrigger) {
+    event.preventDefault();
+    event.stopPropagation();
+    setActiveVoicePlay(projectVoicePlayTrigger);
+    return;
+  }
+
   const multiResourceCard = event.target.closest('[data-modal-panel="project-model-select"] .project-select-card, [data-modal-panel="project-voice-select"] .project-select-card');
   if (multiResourceCard && !event.target.closest("button")) {
     const selectTarget = multiResourceCard.matches("[data-select-resource]")
@@ -1693,6 +1855,49 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const modelCreateChoice = event.target.closest("[data-model-create-choice]");
+  if (modelCreateChoice) {
+    event.preventDefault();
+    openModal("model-create", modelCreateChoice);
+    return;
+  }
+
+  const modelTextSectionTab = event.target.closest("[data-model-text-section-tab]");
+  if (modelTextSectionTab) {
+    event.preventDefault();
+    const panel = getModelCreateModal();
+    const target = modelTextSectionTab.dataset.modelTextSectionTab;
+    panel?.querySelectorAll("[data-model-text-section-tab]").forEach(button => {
+      button.classList.toggle("active", button === modelTextSectionTab);
+    });
+    panel?.querySelectorAll("[data-model-text-section]").forEach(section => {
+      section.classList.toggle("active", section.dataset.modelTextSection === target);
+    });
+    return;
+  }
+
+  const textModelOption = event.target.closest('[data-model-create-mode-panel="text"] .model-option-grid button');
+  if (textModelOption) {
+    event.preventDefault();
+    const group = textModelOption.closest(".model-option-grid");
+    if (group?.hasAttribute("data-model-text-required")) {
+      group.querySelectorAll("button").forEach(button => {
+        button.classList.toggle("active", button === textModelOption);
+      });
+    } else {
+      textModelOption.classList.toggle("active");
+    }
+    updateTextModelSummary();
+    return;
+  }
+
+  const textModelReference = event.target.closest("[data-text-model-reference]");
+  if (textModelReference) {
+    event.preventDefault();
+    analyzeTextModelReference();
+    return;
+  }
+
   const modelUploadCard = event.target.closest("[data-model-upload-card]");
   if (modelUploadCard) {
     event.preventDefault();
@@ -1706,6 +1911,10 @@ document.addEventListener("click", event => {
   if (modelCreatePrimary) {
     event.preventDefault();
     const panel = getModelCreateModal();
+    if (getModelCreateMode(panel) === "text") {
+      submitTextModelCreate();
+      return;
+    }
     const state = panel?.dataset.modelCreateState;
     if (state === "analyzed") {
       startModelFiveViewGeneration();
@@ -1906,6 +2115,11 @@ document.addEventListener("input", event => {
     const modal = productNameInput.closest(".product-create-modal");
     syncProductNameCount(modal);
     syncProductResult(modal);
+  }
+
+  const textModelInput = event.target.closest('[data-model-create-mode-panel="text"] .model-text-custom, [data-model-text-prompt]');
+  if (textModelInput) {
+    updateTextModelSummary();
   }
 });
 
