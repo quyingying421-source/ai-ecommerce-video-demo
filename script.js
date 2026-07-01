@@ -257,6 +257,8 @@ function openModal(name, trigger) {
   if (name === "product-edit") applyProductDetailData();
   const panel = document.querySelector(`[data-modal-panel="${name}"]`);
   if (panel) {
+    if (name === "project-model-select") renderProjectMultiResourceState("model");
+    if (name === "project-voice-select") renderProjectMultiResourceState("voice");
     if (name === "product-upload") {
       const activeCategory = panel.querySelector("[data-upload-category].active")?.dataset.uploadCategory || "服装";
       updateUploadSlots(activeCategory, panel);
@@ -359,6 +361,18 @@ const projectSelectedLabelMap = {
   voice: "[data-project-selected-voice]"
 };
 
+const projectMultiResourceTypes = new Set(["model", "voice"]);
+const projectMultiResourceLimit = 3;
+const projectMultiResourceDraft = {
+  model: [],
+  voice: []
+};
+
+const projectResourceEmptyButtonLabelMap = {
+  model: "上传模特",
+  voice: "上传音色"
+};
+
 const projectDetailResourceConfig = {
   video: {
     label: "已选视频",
@@ -416,7 +430,7 @@ let projectParamDraft = { ...projectParamState };
 function normalizeProjectDuration(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return "15";
-  return String(Math.min(45, Math.max(4, Math.round(number))));
+  return String(Math.min(90, Math.max(4, Math.round(number))));
 }
 
 function getProjectFissionCount() {
@@ -438,7 +452,7 @@ function updateProjectParamSummary() {
 function updateProjectDurationRangeFill(range) {
   if (!range) return;
   const min = Number(range.min) || 4;
-  const max = Number(range.max) || 45;
+  const max = Number(range.max) || 90;
   const value = Math.min(max, Math.max(min, Number(range.value) || min));
   const percent = max === min ? 0 : ((value - min) / (max - min)) * 100;
   range.style.setProperty("--project-duration-fill", `${percent}%`);
@@ -606,6 +620,75 @@ function getProjectResourceImage(type, trigger) {
   return image?.getAttribute("src") || projectDetailResourceConfig[type]?.fallbackImage || "";
 }
 
+function getProjectMultiButtonId(button) {
+  return button?.dataset.resourceLabel || "";
+}
+
+function renderProjectMultiResourceState(type) {
+  if (!projectMultiResourceTypes.has(type)) return;
+  const selected = projectMultiResourceDraft[type] || [];
+  const selectedIds = new Set(selected.map(item => item.id));
+  const isAtLimit = selected.length >= projectMultiResourceLimit;
+  document.querySelectorAll(`[data-select-resource="${type}"]`).forEach(target => {
+    const id = getProjectMultiButtonId(target);
+    const card = target.closest(".project-select-card");
+    const isSelected = selectedIds.has(id);
+    card?.classList.toggle("is-multi-selected", isSelected);
+    card?.classList.toggle("is-multi-limit", isAtLimit && !isSelected);
+    if (target.tagName === "BUTTON") {
+      target.classList.toggle("primary", isSelected);
+      target.disabled = isAtLimit && !isSelected;
+      target.textContent = isSelected ? "已选择" : "选择";
+    }
+  });
+  const count = document.querySelector(`[data-project-multi-count="${type}"]`);
+  if (count) count.textContent = `已选 ${selected.length}/${projectMultiResourceLimit}`;
+}
+
+function toggleProjectMultiResource(button) {
+  const type = button?.dataset.selectResource;
+  if (!projectMultiResourceTypes.has(type)) return false;
+  const id = getProjectMultiButtonId(button);
+  if (!id) return true;
+  const selected = projectMultiResourceDraft[type];
+  const existingIndex = selected.findIndex(item => item.id === id);
+  if (existingIndex >= 0) {
+    selected.splice(existingIndex, 1);
+  } else {
+    if (selected.length >= projectMultiResourceLimit) {
+      showToast(`最多选择 ${projectMultiResourceLimit} 个`);
+      renderProjectMultiResourceState(type);
+      return true;
+    }
+    selected.push({
+      id,
+      label: button.dataset.resourceLabel,
+      meta: button.dataset.resourceMeta,
+      image: getProjectResourceImage(type, button)
+    });
+  }
+  renderProjectMultiResourceState(type);
+  return true;
+}
+
+function resetProjectResource(type) {
+  const config = projectResourceMap[type];
+  const resourceButton = document.querySelector(`[data-project-resource="${type}"]`);
+  if (resourceButton && config) {
+    const icon = resourceButton.querySelector(".project-attach-icon");
+    resourceButton.textContent = projectResourceEmptyButtonLabelMap[type] || config.label;
+    if (icon) resourceButton.prepend(icon);
+    resourceButton.classList.remove("is-selected");
+    resourceButton.removeAttribute("title");
+  }
+  const selectedLabel = document.querySelector(projectSelectedLabelMap[type]);
+  if (selectedLabel) selectedLabel.textContent = "";
+  const generatePage = document.querySelector("[data-project-generate-page]");
+  if (generatePage?.classList.contains("is-active")) {
+    renderProjectSelectedResource(type, null);
+  }
+}
+
 function renderProjectSelectedResource(type, resource) {
   const config = projectDetailResourceConfig[type];
   const card = document.querySelector(`[data-project-selected-card="${type}"]`);
@@ -642,6 +725,28 @@ function openProjectEmptyResourceModal(trigger) {
   if (!modal) return false;
   openModal(modal, trigger);
   return true;
+}
+
+function confirmProjectMultiResource(type) {
+  if (!projectMultiResourceTypes.has(type)) return;
+  const selected = projectMultiResourceDraft[type] || [];
+  if (!selected.length) {
+    resetProjectResource(type);
+    closeModals();
+    showToast(type === "model" ? "已清空模特选择" : "已清空音色选择");
+    return;
+  }
+  const first = selected[0];
+  const label = selected.length === 1 ? first.label : `${first.label}等 ${selected.length} 个`;
+  const meta = type === "model" ? `已选择 ${selected.length} 个模特` : `已选择 ${selected.length} 个音色`;
+  selectResource(type, label, meta, {
+    closest(selector) {
+      if (selector === ".project-select-card, .project-library-video-card, .project-upload-drop") {
+        return { querySelector: () => ({ getAttribute: () => first.image }) };
+      }
+      return null;
+    }
+  });
 }
 
 function resetProjectDetailProgress() {
@@ -724,7 +829,7 @@ function selectResource(type, label, meta, trigger) {
     renderProjectSelectedResource(type, {
       label,
       image: getProjectResourceImage(type, trigger),
-      desc: projectDetailResourceConfig[type]?.desc
+      desc: projectMultiResourceTypes.has(type) && meta ? meta : projectDetailResourceConfig[type]?.desc
     });
   }
   closeModals();
@@ -1280,11 +1385,36 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const multiResourceCard = event.target.closest('[data-modal-panel="project-model-select"] .project-select-card, [data-modal-panel="project-voice-select"] .project-select-card');
+  if (multiResourceCard && !event.target.closest("button")) {
+    const selectTarget = multiResourceCard.matches("[data-select-resource]")
+      ? multiResourceCard
+      : multiResourceCard.querySelector("[data-select-resource]");
+    if (selectTarget) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleProjectMultiResource(selectTarget);
+      return;
+    }
+  }
+
   const selectTrigger = event.target.closest("[data-select-resource]");
   if (selectTrigger) {
     event.preventDefault();
     event.stopPropagation();
+    if (projectMultiResourceTypes.has(selectTrigger.dataset.selectResource)) {
+      toggleProjectMultiResource(selectTrigger);
+      return;
+    }
     selectResource(selectTrigger.dataset.selectResource, selectTrigger.dataset.resourceLabel, selectTrigger.dataset.resourceMeta, selectTrigger);
+    return;
+  }
+
+  const confirmProjectMulti = event.target.closest("[data-confirm-project-multi]");
+  if (confirmProjectMulti) {
+    event.preventDefault();
+    event.stopPropagation();
+    confirmProjectMultiResource(confirmProjectMulti.dataset.confirmProjectMulti);
     return;
   }
 
