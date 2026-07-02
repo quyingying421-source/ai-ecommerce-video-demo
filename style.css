@@ -5850,42 +5850,26 @@ textarea.form-control {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 66px;
-  height: 66px;
+  width: 82px;
+  height: 82px;
   margin-bottom: 24px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #ff8a00, #ffb000);
-  box-shadow: 0 16px 30px rgba(255, 138, 0, .24);
+  background: url("assets/model-create-choice-text-icon.png") center / contain no-repeat;
 }
 
 .model-create-choice-card.image .model-create-choice-icon {
-  background: linear-gradient(135deg, #12c4df, #437cff);
-  box-shadow: 0 16px 30px rgba(67, 124, 255, .24);
+  background-image: url("assets/model-create-choice-image-icon.png");
 }
 
 .model-create-choice-icon::before {
-  content: "";
-  width: 22px;
-  height: 19px;
-  border: 3px solid #fff;
-  border-radius: 8px 8px 6px 6px;
+  display: none;
 }
 
 .model-create-choice-card.image .model-create-choice-icon::before {
-  width: 24px;
-  height: 19px;
-  border-radius: 5px;
+  display: none;
 }
 
 .model-create-choice-card.image .model-create-choice-icon::after {
-  content: "";
-  position: absolute;
-  right: 19px;
-  bottom: 20px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #fff;
+  display: none;
 }
 
 .model-create-choice-card strong,
@@ -5904,26 +5888,6 @@ textarea.form-control {
   color: #657084;
   font-size: 16px;
   line-height: 24px;
-}
-
-.model-create-choice-card i {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 24px;
-  font-style: normal;
-}
-
-.model-create-choice-card b {
-  display: block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ff8a00;
-}
-
-.model-create-choice-card.image b {
-  background: #20aeea;
 }
 
 @media (max-width: 760px) {
