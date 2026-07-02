@@ -148,6 +148,7 @@ function renderVoiceAudioFile(input) {
 
 // 新增模特弹窗交互
 let modelCreateTimer;
+const textModelGeneratedImage = "assets/model-detail-source.png";
 
 function getModelCreateModal() {
   return document.querySelector('[data-modal-panel="model-create"] .model-create-modal');
@@ -183,14 +184,50 @@ function updateTextModelSummary(panel = getModelCreateModal()) {
   const summary = panel.querySelector("[data-model-text-summary]");
   if (!summary) return;
   const values = getTextModelSelections(panel);
+  summary.innerHTML = "";
   if (!values.length) {
     summary.textContent = "请先选择年龄、性别、肤色";
   } else {
-    summary.innerHTML = values.slice(0, 10).map(value => `<span class="badge">${value}</span>`).join("");
+    values.slice(0, 10).forEach(value => {
+      const tag = document.createElement("button");
+      const label = document.createElement("span");
+      const close = document.createElement("i");
+      tag.className = "badge model-summary-badge";
+      tag.type = "button";
+      tag.dataset.modelSummaryRemove = value;
+      label.textContent = value;
+      close.setAttribute("aria-hidden", "true");
+      tag.append(label, close);
+      summary.append(tag);
+    });
   }
   const primary = panel.querySelector("[data-model-create-primary]");
   if (primary && getModelCreateMode(panel) === "text") {
     primary.disabled = !isTextModelReady(panel);
+  }
+}
+
+function removeTextModelSelection(value, panel = getModelCreateModal()) {
+  if (!panel || !value) return;
+  panel.querySelectorAll('[data-model-create-mode-panel="text"] .model-option-grid button.active').forEach(button => {
+    const current = button.dataset.value || button.textContent.trim();
+    if (current === value) button.classList.remove("active");
+  });
+  panel.querySelectorAll('[data-model-create-mode-panel="text"] .model-text-custom').forEach(input => {
+    if (input.value.trim() === value) input.value = "";
+  });
+  const prompt = panel.querySelector("[data-model-text-prompt]");
+  if (prompt?.value.trim() === value) prompt.value = "";
+  updateTextModelSummary(panel);
+}
+
+function setTextModelStage(stage, panel = getModelCreateModal()) {
+  if (!panel) return;
+  panel.dataset.textModelStage = stage;
+  const primary = panel.querySelector("[data-model-create-primary]");
+  if (primary && getModelCreateMode(panel) === "text") {
+    primary.textContent = stage === "generating" ? "正在生成模特图..." : "生成模特图";
+    primary.disabled = stage !== "config" || !isTextModelReady(panel);
   }
 }
 
@@ -288,8 +325,9 @@ function setModelCreateState(state) {
   const dismiss = panel.querySelector("[data-dismiss]");
   if (primary) {
     if (getModelCreateMode(panel) === "text") {
-      primary.textContent = "生成模特";
-      primary.disabled = !isTextModelReady(panel);
+      const textStage = panel.dataset.textModelStage || "config";
+      primary.textContent = textStage === "generating" ? "正在生成模特图..." : "生成模特图";
+      primary.disabled = textStage !== "config" || !isTextModelReady(panel);
     } else {
       const labelMap = {
         idle: "生成五视图",
@@ -302,7 +340,10 @@ function setModelCreateState(state) {
       primary.disabled = ["idle", "analyzing", "generating"].includes(state);
     }
   }
-  if (dismiss) dismiss.textContent = state === "complete" ? "关闭" : "取消";
+  if (dismiss) {
+    const fromTextModel = getModelCreateMode(panel) === "image" && panel.dataset.modelImageSource === "text";
+    dismiss.textContent = fromTextModel && state === "analyzed" ? "上一步" : state === "complete" ? "关闭" : "取消";
+  }
 }
 
 function setModelCreateMode(mode) {
@@ -315,7 +356,7 @@ function setModelCreateMode(mode) {
   if (desc) {
     desc.textContent = mode === "image"
       ? "上传参考人物图片并生成可复用 AI 模特五视图。"
-      : "通过结构化特征和自然语言描述生成可复用 AI 模特。";
+      : "";
   }
   panel.querySelectorAll("[data-model-create-mode-panel]").forEach(modePanel => {
     modePanel.classList.toggle("active", modePanel.dataset.modelCreateModePanel === mode);
@@ -326,6 +367,7 @@ function setModelCreateMode(mode) {
 
 function resetTextModel(panel = getModelCreateModal()) {
   if (!panel) return;
+  setTextModelStage("config", panel);
   panel.querySelectorAll('[data-model-create-mode-panel="text"] .model-option-grid button.active').forEach(button => {
     button.classList.remove("active");
   });
@@ -334,8 +376,6 @@ function resetTextModel(panel = getModelCreateModal()) {
   });
   const reference = panel.querySelector(".model-text-reference");
   reference?.classList.remove("is-analyzed");
-  const referenceButton = panel.querySelector("[data-text-model-reference]");
-  if (referenceButton) referenceButton.innerHTML = '<span class="model-ref-plus"></span>上传参考图并分析';
   panel.querySelectorAll("[data-model-text-section-tab]").forEach((button, index) => {
     button.classList.toggle("active", index === 0);
   });
@@ -347,13 +387,30 @@ function resetTextModel(panel = getModelCreateModal()) {
 
 function resetModelCreateModal(mode = "text") {
   clearTimeout(modelCreateTimer);
+  const panel = getModelCreateModal();
+  if (panel) {
+    panel.dataset.textModelStage = "config";
+    panel.dataset.modelImageSource = "upload";
+  }
+  setModelImageSourceFromText(false);
   setModelCreateMode(mode);
   resetTextModel();
   setModelCreateState("idle");
 }
 
+function setModelImageSourceFromText(enabled) {
+  const panel = getModelCreateModal();
+  if (!panel) return;
+  panel.dataset.modelImageSource = enabled ? "text" : "upload";
+  const caption = panel.querySelector(".model-upload-caption");
+  if (caption) caption.textContent = enabled ? "文生模特生成图" : "用户上传原图";
+  const preview = panel.querySelector(".model-upload-preview img");
+  if (preview) preview.src = enabled ? textModelGeneratedImage : "assets/model-detail-source.png";
+}
+
 function startModelImageAnalysis() {
   clearTimeout(modelCreateTimer);
+  setModelImageSourceFromText(false);
   setModelCreateState("analyzing");
   modelCreateTimer = setTimeout(() => {
     setModelCreateState("analyzed");
@@ -368,6 +425,38 @@ function startModelFiveViewGeneration() {
     setModelCreateState("complete");
     showToast("五视图生成完成");
   }, 1800);
+}
+
+function startTextModelGeneration() {
+  const panel = getModelCreateModal();
+  if (!panel || !isTextModelReady(panel)) {
+    showToast("请先选择年龄、性别、肤色");
+    return;
+  }
+  clearTimeout(modelCreateTimer);
+  setTextModelStage("generating", panel);
+  modelCreateTimer = setTimeout(() => {
+    setTextModelStage("result", panel);
+    showToast("模特图生成完成");
+  }, 1200);
+}
+
+function proceedTextModelToImageFlow() {
+  const panel = getModelCreateModal();
+  if (!panel) return;
+  clearTimeout(modelCreateTimer);
+  setModelImageSourceFromText(true);
+  setModelCreateMode("image");
+  setModelCreateState("analyzed");
+  showToast("已带入文生模特图，请继续生成五视图");
+}
+
+function returnTextModelResultStage() {
+  const panel = getModelCreateModal();
+  if (!panel) return;
+  clearTimeout(modelCreateTimer);
+  setModelCreateMode("text");
+  setTextModelStage("result", panel);
 }
 
 function analyzeTextModelReference() {
@@ -386,18 +475,33 @@ function analyzeTextModelReference() {
       button.classList.toggle("active", button.dataset.value === value);
     });
   });
-  ["长发", "鹅蛋脸", "自然微笑", "真实感", "通勤", "匀称", "亲和自然", "亚洲", "服装", "3:4"].forEach(value => {
+  ["长发", "黑发", "鹅蛋脸", "大眼", "高鼻梁", "自然唇", "野生眉", "匀称", "正常比例", "自然微笑", "站立自然", "亲和自然", "真实感", "通勤", "东亚", "自然光", "服装", "短视频"].forEach(value => {
     const button = panel.querySelector(`[data-model-create-mode-panel="text"] .model-option-grid button[data-value="${value}"]`);
-    button?.classList.add("active");
+    const group = button?.closest(".model-option-grid");
+    group?.querySelectorAll("button").forEach(option => {
+      option.classList.toggle("active", option === button);
+    });
+    const customInput = button?.closest(".model-text-field")?.querySelector(".model-text-custom");
+    if (customInput) customInput.value = "";
   });
   const prompt = panel.querySelector("[data-model-text-prompt]");
   if (prompt && !prompt.value.trim()) {
     prompt.value = "参考图分析为年轻亚洲女性，整体通勤自然风，适合服装和箱包短视频。";
   }
-  const referenceButton = panel.querySelector("[data-text-model-reference]");
-  if (referenceButton) referenceButton.textContent = "已分析参考图";
   updateTextModelSummary(panel);
   showToast("参考图特征已填入文生配置");
+}
+
+function removeTextModelReference() {
+  const panel = getModelCreateModal();
+  if (!panel) return;
+  panel.querySelector(".model-text-reference")?.classList.remove("is-analyzed");
+  ["青年", "女性", "亚洲自然肤色", "长发", "黑发", "鹅蛋脸", "大眼", "高鼻梁", "自然唇", "野生眉", "匀称", "正常比例", "自然微笑", "站立自然", "亲和自然", "真实感", "通勤", "东亚", "自然光", "服装", "短视频"].forEach(value => {
+    const button = panel.querySelector(`[data-model-create-mode-panel="text"] .model-option-grid button[data-value="${value}"]`);
+    button?.classList.remove("active");
+  });
+  updateTextModelSummary(panel);
+  showToast("参考图已删除");
 }
 
 function submitTextModelCreate() {
@@ -406,8 +510,7 @@ function submitTextModelCreate() {
     showToast("请先选择年龄、性别、肤色");
     return;
   }
-  closeModals();
-  showToast("文生模特配置已创建，出图能力待接入");
+  startTextModelGeneration();
 }
 
 function applyModelDetailSource(trigger) {
@@ -2061,14 +2164,23 @@ document.addEventListener("click", event => {
   if (textModelOption) {
     event.preventDefault();
     const group = textModelOption.closest(".model-option-grid");
-    if (group?.hasAttribute("data-model-text-required")) {
-      group.querySelectorAll("button").forEach(button => {
-        button.classList.toggle("active", button === textModelOption);
-      });
-    } else {
-      textModelOption.classList.toggle("active");
+    const wasActive = textModelOption.classList.contains("active");
+    group?.querySelectorAll("button").forEach(button => {
+      button.classList.toggle("active", button === textModelOption && !wasActive);
+    });
+    if (!wasActive) {
+      const customInput = textModelOption.closest(".model-text-field")?.querySelector(".model-text-custom");
+      if (customInput) customInput.value = "";
     }
     updateTextModelSummary();
+    return;
+  }
+
+  const textModelReferenceRemove = event.target.closest("[data-text-model-reference-remove]");
+  if (textModelReferenceRemove) {
+    event.preventDefault();
+    event.stopPropagation();
+    removeTextModelReference();
     return;
   }
 
@@ -2076,6 +2188,13 @@ document.addEventListener("click", event => {
   if (textModelReference) {
     event.preventDefault();
     analyzeTextModelReference();
+    return;
+  }
+
+  const textModelSummaryRemove = event.target.closest("[data-model-summary-remove]");
+  if (textModelSummaryRemove) {
+    event.preventDefault();
+    removeTextModelSelection(textModelSummaryRemove.dataset.modelSummaryRemove);
     return;
   }
 
@@ -2112,6 +2231,20 @@ document.addEventListener("click", event => {
   if (modelCreateRegenerate) {
     event.preventDefault();
     startModelFiveViewGeneration();
+    return;
+  }
+
+  const textModelRegenerate = event.target.closest("[data-text-model-regenerate]");
+  if (textModelRegenerate) {
+    event.preventDefault();
+    startTextModelGeneration();
+    return;
+  }
+
+  const textModelNext = event.target.closest("[data-text-model-next]");
+  if (textModelNext) {
+    event.preventDefault();
+    proceedTextModelToImageFlow();
     return;
   }
 
@@ -2169,6 +2302,16 @@ document.addEventListener("click", event => {
   const dismissTrigger = event.target.closest("[data-dismiss]");
   if (dismissTrigger) {
     event.preventDefault();
+    const panel = dismissTrigger.closest(".model-create-modal");
+    if (
+      panel
+      && getModelCreateMode(panel) === "image"
+      && panel.dataset.modelImageSource === "text"
+      && panel.dataset.modelCreateState === "analyzed"
+    ) {
+      returnTextModelResultStage();
+      return;
+    }
     closeModals();
     return;
   }
@@ -2335,6 +2478,11 @@ document.addEventListener("input", event => {
 
   const textModelInput = event.target.closest('[data-model-create-mode-panel="text"] .model-text-custom, [data-model-text-prompt]');
   if (textModelInput) {
+    if (textModelInput.matches(".model-text-custom") && textModelInput.value.trim()) {
+      textModelInput.closest(".model-text-field")?.querySelectorAll(".model-option-grid button.active").forEach(button => {
+        button.classList.remove("active");
+      });
+    }
     updateTextModelSummary();
   }
 });
@@ -2378,6 +2526,11 @@ document.addEventListener("keydown", event => {
   }
 
   if (event.key === "Escape") closeModals();
+  if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-text-model-reference]")) {
+    event.preventDefault();
+    analyzeTextModelReference();
+    return;
+  }
   if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-voice-audio-uploader]")) {
     event.preventDefault();
     const input = event.target.querySelector("[data-voice-audio-input]");
