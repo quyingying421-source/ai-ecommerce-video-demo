@@ -204,11 +204,65 @@ function setModelCreateSteps(panel, state) {
   if (state === "complete") five?.classList.add("complete");
 }
 
+const defaultModelGeneratedTags = {
+  genderAge: ["女童", "7-12岁"],
+  style: ["甜美休闲风", "田园风", "真实感"]
+};
+
+function renderModelGeneratedTags(field) {
+  const selected = field.querySelector("[data-model-create-selected]");
+  if (!selected) return;
+  const values = Array.from(field.querySelectorAll("[data-model-create-tag-option].active")).map(button => button.dataset.value);
+  selected.innerHTML = values.length
+    ? values.map(value => `<span class="badge">${value}</span>`).join("")
+    : "<span>AI 识别后自动填写</span>";
+}
+
+function setModelCreateTagField(panel, key, values, editable) {
+  const field = panel.querySelector(`[data-model-create-tag-field="${key}"]`);
+  if (!field) return;
+  const selectedValues = new Set(values);
+  field.classList.remove("is-editing");
+  field.querySelectorAll("[data-model-create-tag-option]").forEach(button => {
+    button.classList.toggle("active", selectedValues.has(button.dataset.value));
+    button.disabled = !editable;
+  });
+  const edit = field.querySelector("[data-model-create-tag-edit]");
+  if (edit) {
+    edit.disabled = !editable;
+    edit.textContent = "修改";
+  }
+  renderModelGeneratedTags(field);
+}
+
+function setModelCreateTagFields(panel, mode) {
+  const editable = mode === "analyzed";
+  const shouldClear = mode === "idle";
+  Object.keys(defaultModelGeneratedTags).forEach(key => {
+    if (shouldClear) {
+      setModelCreateTagField(panel, key, [], false);
+    } else if (mode === "analyzed") {
+      setModelCreateTagField(panel, key, defaultModelGeneratedTags[key], editable);
+    } else {
+      const field = panel.querySelector(`[data-model-create-tag-field="${key}"]`);
+      if (!field) return;
+      field.classList.remove("is-editing");
+      field.querySelectorAll("[data-model-create-tag-option]").forEach(button => {
+        button.disabled = true;
+      });
+      const edit = field.querySelector("[data-model-create-tag-edit]");
+      if (edit) {
+        edit.disabled = true;
+        edit.textContent = "修改";
+      }
+      renderModelGeneratedTags(field);
+    }
+  });
+}
+
 function setModelCreateFields(panel, mode) {
   const values = {
     name: "女性6岁甜美休闲/田园风",
-    gender: "女性 / 7",
-    style: "甜美休闲风、亚洲、真实感",
     category: "童装、亲子用品、生活配饰"
   };
   const shouldClear = mode === "idle";
@@ -220,6 +274,7 @@ function setModelCreateFields(panel, mode) {
     if (mode === "analyzed") field.value = value;
     field.disabled = !editable;
   });
+  setModelCreateTagFields(panel, mode);
 }
 
 function setModelCreateState(state) {
@@ -331,7 +386,7 @@ function analyzeTextModelReference() {
       button.classList.toggle("active", button.dataset.value === value);
     });
   });
-  ["长发", "鹅蛋脸", "自然微笑", "真实感", "通勤"].forEach(value => {
+  ["长发", "鹅蛋脸", "自然微笑", "真实感", "通勤", "匀称", "亲和自然", "亚洲", "服装", "3:4"].forEach(value => {
     const button = panel.querySelector(`[data-model-create-mode-panel="text"] .model-option-grid button[data-value="${value}"]`);
     button?.classList.add("active");
   });
@@ -400,6 +455,52 @@ function addModelEditTag(input) {
   tag.append(close);
   list.append(tag);
   input.value = "";
+  syncModelEditPresetTags();
+}
+
+function getModelEditTagValues(modal = document.querySelector('[data-modal-panel="model-edit"]')) {
+  return Array.from(modal?.querySelectorAll(".model-edit-tag") || []).map(tag => tag.firstChild?.textContent?.trim()).filter(Boolean);
+}
+
+function syncModelEditPresetTags() {
+  const modal = document.querySelector('[data-modal-panel="model-edit"]');
+  if (!modal) return;
+  const values = new Set(getModelEditTagValues(modal));
+  modal.querySelectorAll("[data-model-edit-preset-tag]").forEach(button => {
+    button.classList.toggle("active", values.has(button.dataset.value));
+  });
+}
+
+function toggleModelEditPresetTag(button) {
+  const value = button.dataset.value;
+  if (!value) return;
+  const modal = button.closest('[data-modal-panel="model-edit"]');
+  const list = modal?.querySelector("[data-model-edit-tags]");
+  if (!list) return;
+  const exists = Array.from(list.querySelectorAll(".model-edit-tag")).find(tag => tag.firstChild?.textContent?.trim() === value);
+  if (exists) {
+    exists.remove();
+    syncModelEditPresetTags();
+    return;
+  }
+  const dimension = button.dataset.modelEditTagDimension;
+  if (dimension) {
+    const dimensionValues = new Set(Array.from(modal.querySelectorAll(`[data-model-edit-tag-dimension="${dimension}"]`)).map(item => item.dataset.value));
+    list.querySelectorAll(".model-edit-tag").forEach(tagItem => {
+      const tagValue = tagItem.firstChild?.textContent?.trim();
+      if (dimensionValues.has(tagValue)) tagItem.remove();
+    });
+  }
+  const tag = document.createElement("button");
+  tag.className = "model-edit-tag";
+  tag.type = "button";
+  tag.append(document.createTextNode(value));
+  const close = document.createElement("span");
+  close.setAttribute("aria-hidden", "true");
+  close.textContent = "×";
+  tag.append(close);
+  list.append(tag);
+  syncModelEditPresetTags();
 }
 
 function openModal(name, trigger) {
@@ -407,6 +508,7 @@ function openModal(name, trigger) {
   if (name === "voice-upload") updateVoiceModalMode(trigger);
   if (name === "model-create") resetModelCreateModal(trigger?.dataset.modelCreateChoice || "text");
   if (name === "model-detail") applyModelDetailSource(trigger);
+  if (name === "model-edit") syncModelEditPresetTags();
   if (name === "product-upload") resetProductUploadModal();
   if (name === "product-edit") applyProductDetailData();
   const panel = document.querySelector(`[data-modal-panel="${name}"]`);
@@ -471,6 +573,61 @@ function hydrateVideoDetail(trigger) {
       cta.dataset.selectResource = "video";
       delete cta.dataset.projectRemake;
     }
+  }
+}
+
+function setCurrentVideoDetailFromProjectCard(card) {
+  if (!card) return;
+  const image = card.querySelector(".poster-image");
+  const title = card.querySelector(".poster-title")?.textContent?.trim() || "生成视频";
+  const category = card.querySelector(".poster-category")?.textContent?.trim() || "服装";
+  currentVideoDetail = {
+    title,
+    image: image?.getAttribute("src") || "assets/plaza-covers/plaza-04.png",
+    category
+  };
+}
+
+function openProjectMyVideoFullscreen(card) {
+  if (!card) return;
+  const image = card.querySelector(".poster-image");
+  const title = card.querySelector(".poster-title")?.textContent?.trim() || "视频预览";
+  const src = image?.getAttribute("src") || "assets/plaza-covers/plaza-04.png";
+  const overlay = document.createElement("div");
+  const closeButton = document.createElement("button");
+  const stage = document.createElement("div");
+  const poster = document.createElement("img");
+  const playIcon = document.createElement("span");
+  const titleNode = document.createElement("span");
+  overlay.className = "project-my-video-fullscreen";
+  closeButton.className = "project-my-video-fullscreen-close";
+  closeButton.type = "button";
+  closeButton.dataset.projectMyVideoFullscreenClose = "";
+  closeButton.setAttribute("aria-label", "关闭");
+  closeButton.textContent = "×";
+  stage.className = "project-my-video-fullscreen-stage";
+  poster.src = src;
+  poster.alt = "";
+  playIcon.className = "project-my-video-fullscreen-play";
+  titleNode.className = "project-my-video-fullscreen-title";
+  titleNode.textContent = title;
+  stage.append(poster, playIcon, titleNode);
+  overlay.append(closeButton, stage);
+  document.body.appendChild(overlay);
+  document.body.classList.add("modal-open");
+  if (overlay.requestFullscreen) {
+    overlay.requestFullscreen().catch(() => {});
+  }
+}
+
+function closeProjectMyVideoFullscreen() {
+  const overlay = document.querySelector(".project-my-video-fullscreen");
+  if (!overlay) return;
+  const shouldExitFullscreen = document.fullscreenElement === overlay && document.exitFullscreen;
+  overlay.remove();
+  document.body.classList.remove("modal-open");
+  if (shouldExitFullscreen) {
+    document.exitFullscreen().catch(() => {});
   }
 }
 
@@ -1531,6 +1688,30 @@ document.querySelector(".project-selected-rail")?.addEventListener("click", even
 });
 
 document.addEventListener("click", event => {
+  const projectMyVideoPlay = event.target.closest("[data-project-my-video-play]");
+  if (projectMyVideoPlay) {
+    event.preventDefault();
+    event.stopPropagation();
+    openProjectMyVideoFullscreen(projectMyVideoPlay.closest(".project-my-video-card"));
+    return;
+  }
+
+  const projectMyVideoRemake = event.target.closest("[data-project-my-video-remake]");
+  if (projectMyVideoRemake) {
+    event.preventDefault();
+    event.stopPropagation();
+    setCurrentVideoDetailFromProjectCard(projectMyVideoRemake.closest(".project-my-video-card"));
+    openProjectRemakeDetail();
+    return;
+  }
+
+  const projectMyVideoFullscreenClose = event.target.closest("[data-project-my-video-fullscreen-close]");
+  if (projectMyVideoFullscreenClose) {
+    event.preventDefault();
+    closeProjectMyVideoFullscreen();
+    return;
+  }
+
   const projectRemake = event.target.closest("[data-project-remake]");
   if (projectRemake) {
     event.preventDefault();
@@ -1934,10 +2115,45 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const modelCreateTagEdit = event.target.closest("[data-model-create-tag-edit]");
+  if (modelCreateTagEdit) {
+    event.preventDefault();
+    if (modelCreateTagEdit.disabled) return;
+    const field = modelCreateTagEdit.closest("[data-model-create-tag-field]");
+    field?.classList.toggle("is-editing");
+    modelCreateTagEdit.textContent = field?.classList.contains("is-editing") ? "收起" : "修改";
+    return;
+  }
+
+  const modelCreateTagOption = event.target.closest("[data-model-create-tag-option]");
+  if (modelCreateTagOption) {
+    event.preventDefault();
+    if (modelCreateTagOption.disabled) return;
+    const field = modelCreateTagOption.closest("[data-model-create-tag-field]");
+    const dimension = modelCreateTagOption.dataset.modelTagDimension;
+    if (dimension) {
+      field?.querySelectorAll(`[data-model-tag-dimension="${dimension}"]`).forEach(button => {
+        button.classList.toggle("active", button === modelCreateTagOption);
+      });
+    } else {
+      modelCreateTagOption.classList.toggle("active");
+    }
+    if (field) renderModelGeneratedTags(field);
+    return;
+  }
+
+  const modelEditPresetTag = event.target.closest("[data-model-edit-preset-tag]");
+  if (modelEditPresetTag) {
+    event.preventDefault();
+    toggleModelEditPresetTag(modelEditPresetTag);
+    return;
+  }
+
   const modelEditTag = event.target.closest('[data-modal-panel="model-edit"] .model-edit-tag');
   if (modelEditTag) {
     event.preventDefault();
     modelEditTag.remove();
+    syncModelEditPresetTags();
     return;
   }
 
@@ -2152,6 +2368,12 @@ document.addEventListener("keydown", event => {
   if (projectTitleInput && event.key === "Escape") {
     event.preventDefault();
     cancelProjectTitleEdit();
+    return;
+  }
+
+  if (event.key === "Escape" && document.querySelector(".project-my-video-fullscreen")) {
+    event.preventDefault();
+    closeProjectMyVideoFullscreen();
     return;
   }
 

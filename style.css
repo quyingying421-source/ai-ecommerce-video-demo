@@ -5770,6 +5770,26 @@ textarea.form-control {
   line-height: 1;
 }
 
+.model-edit-presets {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #edf0f7;
+  border-radius: 8px;
+  background: #fbfcff;
+}
+
+.model-edit-preset-section {
+  display: grid;
+  gap: 8px;
+}
+
+.model-edit-preset-section strong {
+  color: #657084;
+  font-size: 13px;
+  line-height: 20px;
+}
+
 .model-create-choice-shell {
   position: relative;
   width: min(688px, calc(100vw - 48px));
@@ -5943,6 +5963,18 @@ textarea.form-control {
   min-height: 500px;
 }
 
+.model-text-config-layout {
+  margin-top: 14px;
+  min-height: 360px;
+}
+
+.model-text-top {
+  display: grid;
+  grid-template-columns: minmax(260px, .82fr) minmax(320px, 1.18fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
 .model-text-nav {
   display: grid;
   align-content: start;
@@ -6005,6 +6037,13 @@ textarea.form-control {
   background: #fbfcff;
 }
 
+.model-text-top .model-text-reference {
+  margin-bottom: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
 .model-text-reference strong {
   display: block;
   color: #252632;
@@ -6031,6 +6070,32 @@ textarea.form-control {
   background: rgba(80, 92, 255, .06);
 }
 
+.model-text-top .model-text-reference.is-analyzed {
+  border-color: transparent;
+  background: transparent;
+}
+
+.model-text-description {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.model-text-description > span {
+  color: #252632;
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.model-text-description textarea.form-control {
+  min-height: 92px;
+  resize: vertical;
+}
+
 .model-ref-plus {
   position: relative;
   width: 14px;
@@ -6055,12 +6120,27 @@ textarea.form-control {
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
+.model-text-card-grid {
+  display: block;
+}
+
 .model-text-section {
   display: none;
   padding: 16px;
   border: 1px solid #e6ebf4;
   border-radius: 8px;
   background: #fff;
+}
+
+.model-text-card-grid .model-text-section {
+  display: none;
+  align-content: start;
+  gap: 14px;
+  min-height: 360px;
+}
+
+.model-text-card-grid .model-text-section-wide {
+  min-height: 360px;
 }
 
 .model-text-section.active {
@@ -6116,6 +6196,10 @@ textarea.form-control {
   gap: 8px;
 }
 
+.model-option-grid.ratio button {
+  min-width: 64px;
+}
+
 .model-option-grid button {
   min-height: 32px;
   padding: 0 12px;
@@ -6142,6 +6226,10 @@ textarea.form-control {
 
 .model-text-prompt textarea.form-control {
   min-height: 160px;
+}
+
+.model-text-description.model-text-prompt textarea.form-control {
+  min-height: 92px;
 }
 
 .model-text-summary {
@@ -6486,6 +6574,110 @@ textarea.form-control {
 .model-form-grid {
   border-top: 0;
   padding-top: 18px;
+}
+
+.model-preset-field {
+  min-width: 0;
+  align-content: start;
+}
+
+.model-preset-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.model-preset-head > span {
+  color: #657084;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+.model-preset-head .pill-btn {
+  height: 28px;
+  min-width: 56px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.model-generated-tags {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid #dfe5f1;
+  border-radius: 8px;
+  background: #fbfcff;
+}
+
+.model-generated-tags > span:not(.badge) {
+  color: #a7b0bf;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.model-generated-tags .badge,
+.model-preset-options button.active,
+.model-edit-preset-section .model-preset-options button.active {
+  border-color: rgba(80, 92, 255, .24);
+  background: rgba(80, 92, 255, .08);
+  color: #505cff;
+}
+
+.model-preset-panel {
+  display: none;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #edf0f7;
+  border-radius: 8px;
+  background: #fbfcff;
+}
+
+.model-preset-field.is-editing .model-preset-panel {
+  display: grid;
+}
+
+.model-preset-group {
+  display: grid;
+  gap: 8px;
+}
+
+.model-preset-group strong {
+  color: #657084;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+}
+
+.model-preset-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.model-preset-options button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #dfe5f1;
+  border-radius: 999px;
+  background: #fff;
+  color: #657084;
+  font: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.model-preset-options button:disabled,
+.model-preset-head .pill-btn:disabled {
+  cursor: not-allowed;
+  opacity: .5;
 }
 
 .model-create-modal .form-control:disabled {
@@ -8451,7 +8643,7 @@ textarea.form-control {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: url("assets/voice-play-circle-icon.png") center / contain no-repeat;
+  background: url("assets/project-voice-modal-play-icon.png") center / contain no-repeat;
   color: transparent;
   font-size: 0;
   line-height: 0;
@@ -8472,7 +8664,7 @@ textarea.form-control {
 
 [data-modal-panel="project-voice-select"] .project-voice-play.is-playing,
 [data-modal-panel="project-voice-select"] .project-voice-play.is-playing:hover {
-  background: url("assets/voice-pause-circle-icon.png") center / contain no-repeat;
+  background: url("assets/project-voice-modal-pause-icon.png") center / contain no-repeat;
 }
 
 [data-modal-panel="project-model-select"] .project-select-card.is-multi-selected,
@@ -9280,6 +9472,130 @@ textarea.form-control {
 .page[data-page="project"] .project-mini-video-card {
   min-width: 0;
   cursor: pointer;
+}
+
+.page[data-page="project"] .project-my-video-card {
+  cursor: default;
+}
+
+.page[data-page="project"] .project-my-video-card .poster-play {
+  border: 0;
+  padding: 0;
+  appearance: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.page[data-page="project"] .project-my-video-card .poster-title {
+  transition: bottom .16s ease;
+}
+
+.page[data-page="project"] .project-my-video-card:hover .poster-title,
+.page[data-page="project"] .project-my-video-card:focus-within .poster-title {
+  bottom: 52px;
+}
+
+.project-my-video-action {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: #4f5cff;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .16s ease, transform .16s ease, background .16s ease;
+}
+
+.project-my-video-card:hover .project-my-video-action,
+.project-my-video-card:focus-within .project-my-video-action {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.project-my-video-action:hover {
+  background: #4652ee;
+}
+
+.project-my-video-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+  background: rgba(10, 14, 28, .94);
+}
+
+.project-my-video-fullscreen-close {
+  position: fixed;
+  top: 24px;
+  right: 28px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .14);
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.project-my-video-fullscreen-stage {
+  position: relative;
+  width: min(420px, 72vw);
+  max-height: 86vh;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #111827;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .42);
+}
+
+.project-my-video-fullscreen-stage::after {
+  content: "";
+  position: absolute;
+  inset: 42% 0 0;
+  background: linear-gradient(180deg, rgba(16, 23, 42, 0), rgba(16, 23, 42, .78));
+}
+
+.project-my-video-fullscreen-stage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-my-video-fullscreen-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: 54px;
+  height: 54px;
+  transform: translate(-50%, -50%);
+  background: url("assets/plaza-covers/play-button.png") center / contain no-repeat;
+}
+
+.project-my-video-fullscreen-title {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
 }
 
 .project-generate-page {
@@ -10754,6 +11070,11 @@ textarea.form-control {
   .model-text-layout {
     grid-template-columns: 1fr;
     min-height: auto;
+  }
+
+  .model-text-top,
+  .model-text-card-grid {
+    grid-template-columns: 1fr;
   }
 
   .model-text-nav {
